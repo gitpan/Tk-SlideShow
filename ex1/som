@@ -1,0 +1,6 @@
+Tk::SlideShow::Sprite->Get('som/i0')->place(23,207);
+Tk::SlideShow::Sprite->Get('som/i1')->place(21,245);
+Tk::SlideShow::Sprite->Get('som/i2')->place(22,279);
+Tk::SlideShow::Sprite->Get('som/i3')->place(21,320);
+Tk::SlideShow::Sprite->Get('som/i4')->place(21,357);
+Tk::SlideShow::Sprite->Get('som/i5')->place(22,395);

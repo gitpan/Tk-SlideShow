@@ -1,0 +1,63 @@
+=head1 NAME
+
+     Tk::SlideShow - a Perl Module for building presentation.
+
+=head1 DESCRIPTION
+
+	This module is for building presentation, that will be as
+interactive or good looking as Applix or PowerPoint one. The way of
+using it is complety different on the other hand.
+
+=head1 INSTALL
+
+CPAN Perl standard way of intalling :
+
+	perl Makefile.PL
+	make
+	make test
+	make install
+
+Warning there is a test on font availability that 
+takes a lot of time depending on how many font families you
+have installed on your X11 distribution.
+
+On my P90 linux box it takes about 6 minutes and block my X11 server
+during that time. Actually, I got all freefont and sharefont set.
+
+
+=head1 DOCUMENTATION
+
+There's a pod file C<SlideShow.pod> that is a tutorial as well as a
+reference to this module.
+
+There's also a not yet finished presentation of C<Tk::SlideShow> using
+itself.
+
+=Head1 EXAMPLE
+
+You will find examples of scripts using this modules in directories
+ex1, ex2, ...
+
+=head1 AUTHOR
+
+Olivier Bouteille (bouteille@dial.oleane.com)
+
+=head PREREQUISITE
+
+You need to have X11::Protocol and Tk800.012 modules already install,
+
+You need to use X11 (and of course Unix).
+
+You need to already know Perl5.4 and Tk
+
+=head MISCELANEOUS
+
+Alpha stage release. API may change.
+
+=cut
+
+
+
+
+
+

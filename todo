@@ -1,0 +1,33 @@
+* functionnalities
+
+- add a travel comcept of sprite : that is sprite that evolve thru a
+  slide rather than jus come from left top bottom or right.
+
+- Add a way of producing postscript of slides
+
+- add a notion of library of sprite (autoload-able, and browsable) 
+
+- add a gif sprite chooser with a library.
+
+- Add a font chooser.
+
+- Add a color chooser.
+
+* Documentation
+
+- finalize documentation of SlideShow as a presentation.
+
+- add latex documentation when finalized
+
+- add  doc on ltx2gif.
+
+- reread and refresh sources
+
+- add more example
+
+* Improvement
+
+Make it work even if X11:Protocol is not available
+
+  
+ 
