@@ -101,7 +101,9 @@ $p->add('warp',
 	});
 $p->add('multipos', 
 	sub {
-	  my $s = $p->Compuman("t");
+	  $p->Text('fix','Fixed Text');
+	  my $s= $p->Compuman("t");
+	  $p->newLink('t','fix');
 	  my @a = (0,0,$w-100,int($h/2),0,$h-100);
 	  $p->a_multipos('t',2,-speed,1000,-steps, 2);
 	  $s->multipos(@a);

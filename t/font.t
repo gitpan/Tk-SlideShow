@@ -19,6 +19,7 @@ open(FONT,"xlsfonts |") or die;
 while(<FONT>) {
   next unless /^-/;
   my @a = split /-/;
+  next unless $a[9] == 0;
   $f{$a[2]} = 1;
 }
 

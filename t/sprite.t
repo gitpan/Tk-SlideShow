@@ -34,7 +34,9 @@ $p->add('sprite',
 	  $p->Text('text','Text Sprite',-font,$p->f3);
 	  $p->Image('image','Xcamel.gif');
 	  $p->Image('i2','eq1.gif');
-	  $p->Anim('anim','anim.gif');
+	  $p->newLink($p->Anim('anim','anim.gif'),
+		      $p->Oval('oval',-width,4,-outline,'orange'));
+	  $p->newArrow('text','i2');
 	  for (1..10) {compuman("gus$_");}
 	  $p->load ;
 	  print "ok 1\n";
@@ -52,3 +54,9 @@ if (@ARGV) {
 # Local Variables: ***
 # mode: perl ***
 # End: ***
+
+
+
+
+
+

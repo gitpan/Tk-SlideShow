@@ -165,7 +165,7 @@ to give examples, of course.
 
 =head2 Method C<add>
 
-As, I'm sure you have understood, the central method for you is the
+As, I'm sure you have understood : the central method for you is the
 C<add> method. This is where you are going to specify your slides.
 
 As I mention above, this method add a new slide on the pile of already
@@ -600,13 +600,13 @@ previously) :
 	   $p->load;
 	   $p->a_bottom('titre');
 	   $p->a_left(map{"item$_"}(0..2));
-	}
+	})
 
 What we see here is that after loading the position of our title and
 items, I ask for title to appear slipping from bottom to it's place
 when I will press button 3. If I press it again and again, I will see
-the items arriving on my slide, slipping for the let side of it to
-there right place. You may have used as well method C<a_right> or
+the items arriving on my slide, slipping for the left side of it to
+there final place. You may have used as well method C<a_right> or
 C<a_top> for making them arrive repectively from right or from top
 side of the slide. Note that you can play back this evolution by
 pressing C<Control-Button-3>.
@@ -624,7 +624,8 @@ You are also able to let appear a  B<Sprite> suddenly by using
 method C<a_warp>.
 
 Sometimes you may want to make a B<Sprite> leave the slide. Just
-replace the prefix C<a_> (standing for arrive) by C<l_>.
+replace the prefix C<a_> (standing for arrive) by C<l_> (standing for
+leaving).
 
 Sometimes, it is useful to show a B<Sprite> evolving thru a path.
 This is done by using method C<a_multipos>. You have to give it a
@@ -647,7 +648,12 @@ specified each position.  The script example is trivial :
 
 That will help describing the different stage of a document in
 workflow system, for example. Here, the document will have 10
-differents position, it will remember.
+differents position, it will remember. 
+
+You may want to specify the positions explicitly (computed, e.g.) in
+the script. This is posible, of course. Just use the method
+C<multipos> on the B<Sprite> object, and give an C<ARRAY> of the
+positions just like you will define a line in a B<Tk> canvas.
 
 
 =head1 Linking B<Sprites>
@@ -713,10 +719,14 @@ There are severals methods for that, used in my previous examples :
 
 This method return a scalable C<charter> font of a point size of
 150. If you give it an argument, this will be taken to be multiplied
-to 150. The family used by default is C<Utopia>. You may change this
+to 150. The family used by default is C<charter>. You may change this
 default family by using the method C<family> with the new family as
 argument. The list of family depends on your distribution of X11. On
-my Linux box I have approximatly 20 family that are all free fonts. 
+my Linux box I have approximatly 20 family that are all free fonts.
+
+Here's where you may get these nice and funny fonts :
+  
+    ftp://ftp.gimp.org/pub/gimp
 
 =item f1, f2, ..., f5
 
@@ -768,17 +778,14 @@ So, you may write this small sub :
   sub small_summarize {
     my $count = 0;
     my @p = @plan;
-    my ($fsmall,$fbig) = ($p->0_5, $p->f1);
     while(@p) {
       my ($slide,$title) = (shift @p, shift @p);
       my $id = "som/i$count";
-      my ($color,$font) = $p->currentName eq $slide ?
-	     ('red', $fbig) : ('blue',$fsmall) ;
-      $p->Text($id,$title, -font, $font, -fill,$color, -anchor,'w');
+      $p->Text($id,$title, -font, $p->f1, -fill,'blue', -anchor,'w');
       $p->warp($id,'<Double-1>',$diapo);
       $count ++;
     }
-    $p->load('som');
+    $p->load('som'); # this load only place for sprites names som/...
   }
 
 You learn here that you can get the current id of the slide being
@@ -853,9 +860,9 @@ You can easily make box entities hyperlinks to slides.
 
 As far as I am concerned, I feel that considering a paper copy of
 slides as a documentation of a presentation is non sense. You have to
-add your speach added value to it. That why, I like to add to my
-presentation, a documentation to each slides. This helps me also to
-prepare the presentation.
+add your speach added value to it. That's why, in case I want to let
+some documentation, I like to add to my presentation, a documentation
+to each slides. This helps me also to prepare the presentation.
 
 To add documentation to my slides, I have choosen to use html as a
 language. Maybe in a future release, somebody else will want to
@@ -865,7 +872,7 @@ pod).
 So, that's the reason for the method C<html> on a
 C<Tk::SlideShow::Diapo> object.
 
-To let you add an header and a footer of to your presentation paper, I
+To let you add an header and a footer to your presentation paper, I
 have added 2 methods for the C<Tk::SlideShow> object : C<htmlheader>
 and C<htmlfooter>.
 
@@ -877,8 +884,10 @@ slides, plus HTML documentation explicitly attached to each slides (or
 Tk::SlideShow::Diapo).
 
 Note that the technic used to snapshot your slides is by using the X11
-command C<xwd>. Then it is converted in PNG image format, so that your
-images will be viewable on most of browsers.
+command C<xwd>. Then it is converted in GIF image format, so that your
+images will be viewable on most of browsers. As for now, I use convert
+(from ImageMagick) to convert xwd to gif format as well as for
+realizing the thumbnail.
 
 
 So to sumarize this here's the look of a more complete example of a

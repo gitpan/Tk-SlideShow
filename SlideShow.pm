@@ -5,12 +5,12 @@ use Tk::Xlib;
 use Tk::After;
 use Tk::Animation;
 use Tk::Font;
-use X11::Protocol;
 
 use Tk::SlideShow::Dict;
 use Tk::SlideShow::Placeable;
 use Tk::SlideShow::Diapo;
 use Tk::SlideShow::Sprite;
+use Tk::SlideShow::Oval;
 use Tk::SlideShow::Link;
 use Tk::SlideShow::Arrow;
 use Tk::SlideShow::DblArrow;
@@ -34,7 +34,7 @@ package Tk::SlideShow;
 
 use vars qw($VERSION);
 
-$VERSION='0.05';
+$VERSION='0.06';
 
 my ($can,$H,$W,$xprot,$present);
 my $mainwindow;
@@ -42,11 +42,13 @@ my $mode = 'X11';
 my $family = "charter";
 use vars qw($inMainLoop $nextslide $jumpslide);
 $nextslide = 0;
+
 sub var_getset{
   my ($s,$k,$v) = @_;
   if (defined $v) {$s->{$k} = $v; return $s;}
   else            {               return $s->{$k} ;}
 };
+
 sub family {
   my ($class,$newfamily) = @_;
   if (defined $newfamily) {$family = $newfamily;}
@@ -72,6 +74,14 @@ sub canvas {return $can }
 sub h { return $H}
 sub w { return $W}
 
+sub present_start { var_getset((shift),'present_start',@_)};
+sub diapo_start   { var_getset((shift),'diapo_start',@_)};
+my $steps = 50;
+sub steps { my ($s,$v) = @_;
+	    return $steps unless defined $v;
+	    $steps = $v;
+	    return $s}
+
 
 sub title_ne {
   my ($s,$texte) = @_;
@@ -89,11 +99,14 @@ my $current_item = "";
 
 sub enter {
   $current_item = ($can->gettags('current'))[0]; 
-  # print "entering $current_item\n"; 
+#  my $s = Tk::SlideShow::Dict->Get($current_item);
+#  print "entering $current_item\n"; 
+#  $can->configure(-cursor, 'hand2');
 }
 sub leave {
-  # print "leaving $current_item\n"; 
+#  print "leaving $current_item\n"; 
   $current_item = "";
+#  $can->configure(-cursor, 'xterm');
 }
 
 sub current_item {
@@ -115,8 +128,13 @@ sub init {
   $mainwindow = $m;
   $present = bless { 'current' => 0, 'mw' => $m, 'fond'=>'ivory',
 		   'slides_names' => {}};
-  # util pour forcer le déplaceement de la souris (pointer)
-  $xprot = X11::Protocol->new();
+  # This following part is there to force pointer to move
+  # It is used for placing anchor of arrows.
+  eval q{
+      use X11::Protocol;
+      $xprot = X11::Protocol->new();
+  };
+  warn $@ if $@;
   $H = $h || $m->Display->ScreenOfDisplay->HeightOfScreen;
   $W = $w || $m->Display->ScreenOfDisplay->WidthOfScreen;
   print ("H=$H, W=$W\n");
@@ -206,7 +224,8 @@ sub postscript {
 #internals
 sub warppointer {
   my ($x,$y) = @_;
-  $xprot->WarpPointer(0, hex($can->id), 0, 0, 0, 0, $x, $y);
+  $xprot->WarpPointer(0, hex($can->id), 0, 0, 0, 0, $x, $y)
+      if $xprot;
 }
 
 # this sub create a popup window with key binding help
@@ -272,18 +291,19 @@ sub init_bindings {
 
 
 #internals
-sub trace_fond {
-  shift;
-  my $m = $mainwindow;
-  if (ref($present->bg) eq 'CODE') {
-    &{$present->bg};
-  } else {
-    $can->configure(-background, $present->bg);
+{ my $repeat_id;
+  sub trace_fond {
+    shift;
+    my $m = $mainwindow;
+    if (ref($present->bg) eq 'CODE') {
+      &{$present->bg};
+    } else {
+      $can->configure(-background, $present->bg);
+    }
+    $repeat_id->cancel if defined $repeat_id;
+    default_footer();
+    $repeat_id = $m->repeat(5000,\&default_footer);
   }
-  my $t = $present->currentName. "(".($present->current+1)."/". $present->nbslides.")";
-
-  $can->createText(10,$H - 10,'-text',$t,-anchor,'sw',
-		-font, Tk::SlideShow->f1);
 }
 #internals
 sub wait {
@@ -300,6 +320,8 @@ sub wait {
 sub clean { 
   my $class = shift;
   $can->delete('all'); 
+#  print "Afters : ".join('     ',$can->after('info'))."\n";
+  for ($can->after('info')) { $can->Tk::after('cancel',$_);}
   $present->{'action'}= [];
   $present->{'save_action'}= [];
   Tk::SlideShow::Placeable->Clean;
@@ -329,9 +351,16 @@ sub arrive {
   return  unless $mode eq 'X11';
   for my $tag (@tags) {
     if (ref($tag) eq 'ARRAY') {
-      for (@$tag) {$can->move($_,-$dx,-$dy) if visible($can,$_);}
+      for (@$tag) {
+	$can->move($_,-$dx,-$dy) if visible($can,$_);
+	my $spri =  Tk::SlideShow::Dict->Get($_);
+	for my $l ($spri->links) {$l->hide;}
+      }
     } else { 
       $can->move($tag,-$dx,-$dy) if visible($can,$tag);
+      my $spri =  Tk::SlideShow::Dict->Get($tag);
+      for my $l ($spri->links) {$l->hide;}
+
     }
     push @{$present->{'action'}},[$tag,$maniere,$dx,$dy];
   }
@@ -353,23 +382,40 @@ sub shiftaction {
   @_ = (@$a);
   my $tag = shift;
   my $maniere = shift;
-  my $step = 50;
+  my $step = Tk::SlideShow->steps;
   $maniere eq 'smooth'  and 
     do {
       my ($dx,$dy) = @_;
       for(my $i=0;$i<$step;$i++){
 	if (ref($tag) eq 'ARRAY') {
-	  for (@$tag) {$c->move($_,$dx/$step,$dy/$step);}
-	} else { $c->move($tag,$dx/$step,$dy/$step);}
+	  for (@$tag) {
+	    $c->move($_,$dx/$step,$dy/$step);
+	    my $spri = Tk::SlideShow::Dict->Get($_);
+	    for my $l ($spri->links) {$l->show;}
+	  }
+	} else { 
+	  $c->move($tag,$dx/$step,$dy/$step);
+	  my $spri = Tk::SlideShow::Dict->Get($tag);
+	  for my $l ($spri->links) {$l->show;}
+	}
 	$c->update;
       }
+
     };
   $maniere eq 'direct' and 
     do {
       my ($dx,$dy) = @_;
       if (ref($tag) eq 'ARRAY') {
-	for (@$tag) {$c->move($_,$dx,$dy);}
-      } else { $c->move($tag,$dx,$dy);}
+	for (@$tag) {
+	  $c->move($_,$dx,$dy);
+	  my $spri = Tk::SlideShow::Dict->Get($_);
+	  for my $l ($spri->links) {$l->show;}
+	}
+      } else { 
+	$c->move($tag,$dx,$dy);
+	my $spri = Tk::SlideShow::Dict->Get($tag);
+	for my $l ($spri->links) {$l->show;}
+      }
       $c->update;
     };
   $maniere eq 'a_chpos' and 
@@ -396,14 +442,22 @@ sub unshiftaction {
   @_ = (@$a);
   my $tag = shift;
   my $maniere = shift;
-  my $step = 50;
+  my $step = Tk::SlideShow->steps;
   $maniere eq 'smooth'  and 
     do {
       my ($dx,$dy) = @_;
       for(my $i=0;$i<$step;$i++){
 	if (ref($tag) eq 'ARRAY') {
-	  for (@$tag) {$c->move($_,-$dx/$step,-$dy/$step);}
-	} else { $c->move($tag,-$dx/$step,-$dy/$step);}
+	  for (@$tag) {
+	    $c->move($_,-$dx/$step,-$dy/$step);
+	    my $spri = Tk::SlideShow::Dict->Get($_);
+	    for my $l ($spri->links) {$l->show;}
+	  }
+	} else { 
+	  $c->move($tag,-$dx/$step,-$dy/$step);
+	  my $spri = Tk::SlideShow::Dict->Get($tag);
+	  for my $l ($spri->links) {$l->show;}
+	}
 	$c->update;
       }
     };
@@ -463,12 +517,14 @@ sub add {
 sub play {
   my ($class,$timetowait) = @_;
   my $current = $present->current;
+  $present->present_start(time);
   my $nbslides = @{$present->{'slides'}};
   while(1) {
     $jumpslide = 0;
     $current =  $present->current;
     my $diapo = $present->{'slides'}[$current];
     print "Executing slide number $current\n";
+    $present->diapo_start(time);
     $present->start_slide;
     &{$diapo->code};
     if (defined $timetowait) {
@@ -609,6 +665,103 @@ sub latexabstract {
   close OUT;
 }
 
+sub default_footer {
+  my $now = time;
+#  print "default footer displaying\n";
+#  my $td = $now - $present->diapo_start;
+#  my $tp = $now - $present->present_start;
+  my $num = $present->current+1;
+  my $nbs = $present->nbslides;
+  my $name = $present->currentName;
+#  $td = $td>60 ? sprintf("%s'%ss",int($td/60),$td%60) : "${td}s";
+#  $tp = $tp>60 ? sprintf("%s'%ss",int($tp/60),$tp%60) : "${tp}s";
+    
+#  my $t = "$name($num($td))/$nbs($tp))";
+  my $t = "$name($num/$nbs)";
+  $can->delete('footer');
+  $can->createText(10,$H - 10,'-text',$t,-anchor,'sw',
+		   -tags,'footer');
+}
+
+sub template {
+  print qµ#!/usr/local/bin/perl5
+
+use Tk::SlideShow;
+use strict;
+
+my $p = Tk::SlideShow->init(1024,768) or die;
+
+$p->save;
+
+my ($mw,$c,$h,$w) = ($p->mw, $p->canvas, $p->h, $p->w);
+my $d;
+
+#--------------------------------------------
+#--------------------------------------------
+$d = $p->add('summary',
+	     sub {
+	       title('First title');
+	       my @ids = items('a0',"item1 \n item2 \n item3",
+			       -font => $p->f2,-fill, 'red');
+	       $p->load;
+	       $p->a_top(@ids);
+	     });
+
+$d->html(" ");
+
+#--------------------------------------------
+#--------------------------------------------
+$d = $p->add('first',
+	     sub {
+	       title('Second');
+	       my @a = items('a0',"item1 \n item2 \n item3",
+			     -font,$p->f2,-fill,'red');
+	       $p->load;
+	       $p->a_left(@a);
+	     });
+
+
+$d->html(" ");
+
+sub title { $p->Text('title',shift,-font,$p->f3); }
+
+sub items {
+  my ($id,$items,@options) = @_; my @ids;
+  for (split (/\n/,$items)) {
+    s/^\s*//; s/\s*$//;
+    $p->Text($id,$_,@options);
+    push @ids,$id; $id++;
+  }
+  return @ids;
+}
+sub example {
+  my ($id,$t,@options) = @_;
+  $t =~ s/^\s+//; $t =~ s/\s+$//;
+  my $s = $p->newSprite($id);
+  my $f = $c->Font('family'  => "courier", point => 250, -weight => 'bold');
+  $c->createText(0,0,-text,'Example',
+		 -font => $f, -tags => $id, 
+		 -fill,'red',
+		 -anchor => 'sw');
+  my $idw = $c->createText(0,0,-text,$t,@options, -tags => $id,
+			   -fill,'yellow', -font => $f,
+			  -anchor => 'nw');
+  $c->createRectangle($c->bbox($idw), -fill,'black',-tags => $id);
+  $c->raise($idw);
+  $s->pan(1);
+  return $s;
+}
+
+
+if (grep (/-html/,@ARGV)) {
+  $p->html("doc");
+  exit 0;
+}
+
+$p->current(shift || 0);
+$p->play;
+µ;
+}
 
 # wrappers
 
@@ -623,6 +776,7 @@ sub Text {return Tk::SlideShow::Sprite::text(@_);}
 sub Framed {return Tk::SlideShow::Sprite::framed(@_);}
 sub Image {return Tk::SlideShow::Sprite::image(@_);}
 sub Anim {return Tk::SlideShow::Sprite::anim(@_);}
+sub Oval {return Tk::SlideShow::Oval::New(@_);}
 
 sub TickerTape {return Tk::SlideShow::Sprite::tickertape(@_);}
 sub Compuman {return Tk::SlideShow::Sprite::compuman(@_);}

@@ -2,8 +2,6 @@ package Tk::SlideShow::Sprite;
 use strict;
 use vars qw(@ISA); @ISA = qw(Tk::SlideShow::Placeable);
 
-Tk::SlideShow::Placeable->AddClass('Tk::SlideShow::Sprite');
-
 sub New {
   my ($class,$id) = @_;
   my $s = $class->SUPER::New($id);
@@ -90,6 +88,8 @@ sub chpos {
     my $ty = $y0+$t*$dy;
     my ($tdx,$tdy)  = (int($tx-$x),int($ty-$y));
     $can->move($tag,$tdx,$tdy);
+    my $spri = Tk::SlideShow::Dict->Get($tag);
+    for my $l ($spri->links) {$l->show;}
     $x += $tdx; $y += $tdy;
     $can->update;
     $can->after(int($dt/$step*1000),
@@ -115,8 +115,10 @@ sub text {
   $s->{-font} = "";   bindfontchoosermenu($id);
   $s->{-color} = ""; bindcolorchoosermenu($id);
   $s->pan(1);
+  $s->cursor('umbrella');
   return $s;
 }
+
 
 # managing font for Sprites with text
 {
@@ -129,7 +131,11 @@ sub text {
     my $can = Tk::SlideShow->canvas;
     my $mw = Tk::SlideShow->mw;
     open(FONT,"xlsfonts |") or die;
-    while(<FONT>) {next unless /^-/; my @a = split /-/; $f{$a[2]} = 1;}
+    while(<FONT>) {next unless /^-/; 
+	my @a = split /-/; 
+	# avoiding non scalable fonts
+	next unless $a[9] == 0;
+	$f{$a[2]} = 1;}
     close (FONT);
     $fontmenu = $mw->Menu;
     my $lb = $fontmenu->Scrolled('Listbox')->pack;
@@ -397,15 +403,22 @@ sub compuman {
 }
 
 sub tickertape {
-  my ($p,$id,$text,$len,@options) = @_;
+  my ($p,$id,$text,$len,%options) = @_;
 
   my $spri = $p->newSprite($id)->pan(1);
   my ($mw,$can,$H,$W) = ($p->mw,$p->canvas,$p->h,$p->w);
+  my $delay = 50;
+  my $chunk = 5;
 
+  # extracting my own options
+  if (exists $options{'-delay'}) {
+    $delay = $options{'-delay'}; delete $options{'-delay'};}
+  if (exists $options{'-chunk'}) {
+    $chunk = $options{'-chunk'}; delete $options{'-chunk'};}
   my $idw = $can->createText(0,0,
 			     '-text',substr($text,0,$len), 
 			     -tags => $id,
-			     @options
+			     %options
 			    );
   my @bbox = $can->bbox($id);
   my $larg = $bbox[2]-$bbox[0];
@@ -414,20 +427,21 @@ sub tickertape {
   my $scan = $mw->Canvas(-height,$haut,-width,$larg,-background,$bg);
   $can->createWindow($W/2,$H/2,'-anchor','nw','-window',$scan,'-tags',$id);
   $can->delete($idw);
-  my @def = (-anchor, 'nw','-text',$text,'-tags' => $id, @options);
+  my @def = (-anchor, 'nw','-text',$text,'-tags' => $id, %options);
   $idw = $scan->createText(0,0,@def);
   @bbox = $scan->bbox($idw);
   my $txtwidth = $bbox[2];
   $scan->createText($txtwidth,0, @def);
   $can->createRectangle($can->bbox($id),-width,20,-outline,$bg,-tags,$id);
   sub tourne {
-    my ($spri,$can,$scan,$txtwidth) = @_;
+    my ($spri,$can,$scan,$txtwidth,$delay,$chunk) = @_;
     my $tag = $spri->id;
-    $scan->move($tag,-5,0);
+    $scan->move($tag, (0 - $chunk) ,0);
     $scan->move($tag, $txtwidth,0) if ($scan->bbox($tag))[2] < $scan->Width;
-    $can->after(50,[\&tourne,$spri,$can,$scan,$txtwidth]);
+    $can->after($delay,
+		[\&tourne,$spri,$can,$scan,$txtwidth,$delay,$chunk]);
   }
-  tourne($spri,$can,$scan,$txtwidth);
+  tourne($spri,$can,$scan,$txtwidth,$delay,$chunk);
   return $spri;
 }
 

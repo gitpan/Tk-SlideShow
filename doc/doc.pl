@@ -10,6 +10,8 @@ $p->save;
 my ($mw,$c,$h,$w) = ($p->mw, $p->canvas, $p->h, $p->w);
 my $d;
 
+$p->steps(10);
+
 sub title {
   $p->Image('ti',"Xcamel.gif");
   $p->Text('title',shift,-font,$p->f3);
@@ -17,12 +19,15 @@ sub title {
 
 sub items {
   my ($id,$items,@options) = @_;
+  my @ids;
   for (split (/\n/,$items)) {
     s/^\s*//;
     s/\s*$//;
     $p->Text($id,$_,@options);
-	    $id++;
+    push @ids,$id;
+    $id++;
   }
+  return @ids;
 }
 $d = $p->add('summary',sub {
 	  title('Tk::SlideShow');
@@ -32,7 +37,8 @@ $d = $p->add('summary',sub {
 	  items('b0',"a TkPerl alternative to PowerPoint\nPerl power\nBy examples",
 		-font => $p->f2,-fill, 'blue');
 	  $p->TickerTape('help',"Press q to quit, h for key help, button 3 to progress in slide, space for next slide .... ",
-			 70,-font,$p->f1,-fill,'red');
+			 70,-font,$p->f1,-fill,'red',
+			-delay, 300, -chunk, 20);
 	  $p->load;
 	  for (0..2) {$p->a_top("a$_"); $p->a_bottom("b$_");}
 });
@@ -89,21 +95,36 @@ Well, mostly by examples, because perl folks don't like having to
 learn another theory when explaining their's
 ");
 
+$d = $p->add('principles',sub {
+	  title('Principles');
+	  my @a = items('a0',"Take advantage of your computer kwnoledge
+Be nearly unlimited in expression
+Solicite Architect & Artist that's in yourself
+Be coherent with your OpenSource choices",-font,$p->f2,-fill,'red');
+	  $p->load;
+	  $p->a_left(@a);
+});
+
 
 
 sub example {
   my ($id,$t,@options) = @_;
   $t =~ s/^\s+//; $t =~ s/\s+$//;
   my $s = $p->newSprite($id);
+  my $f = $c->Font('family'  => "courier", point => 250, -weight => 'bold');
   $c->createText(0,0,-text,'Example',
-		 -font => $p->f1, -tags => $id, -anchor => 'sw');
+		 -font => $f, -tags => $id, 
+		 -fill,'red',
+		 -anchor => 'sw');
   my $idw = $c->createText(0,0,-text,$t,@options, -tags => $id,
+			   -fill,'yellow', -font => $f,
 			  -anchor => 'nw');
-  $c->createRectangle($c->bbox($idw), -fill,'light green',-tags => $id);
+  $c->createRectangle($c->bbox($idw), -fill,'black',-tags => $id);
   $c->raise($idw);
   $s->pan(1);
   return $s;
 }
+
 
 #############################################################
 
@@ -112,7 +133,8 @@ $d = $p->add('prerequisite',sub {
 	  example('ex',"use Tk::SlideShow;\nmy \$p= Tk::SlideShow->init(1024,768);\n\$p->save;",
 		  -font => $p->ff2
 		 );
-	  items('a0',"You have to know Perl and Tk !
+	  items('t0',"You have to : ",-font, $p->f3);
+	  items('a0',"Know Perl and Tk !
                       Tell what your screen size is.
                       Ask for your Art to be saved.",
 		-font => $p->f2,-fill, 'red');
@@ -148,17 +170,24 @@ specified it. The class method \\texttt{\\bf save} is there to allow
 to save your interactive modification.
 
 ");
+
+
+
+
 $d = $p->add('first-slide',sub {
 	  title('My first slide');
+	  items('aaa','As an architect',-font,$p->f2);
 	  example('ex',
 		  q{$p->add('first-slide',
-sub {
+ sub {
+
   $p->Text('t1',"My first Tk::SlideShow slide");
   $p->Text('t2',"This is simple");
   $p->Text('t3',"This is simplist");
-  $p->Load;
-}
-},
+
+  $p->load;
+ }
+)},
 		  -font => $p->ff1
 		 );
 	  items('a0',"Add a slide
@@ -167,8 +196,11 @@ Give the sub
 Describe the texts
 Load the positions",
 		-font => $p->f2,-fill, 'blue');
+	  for (0..4) {
+	    $p->newLink("a$_",$p->Oval("o$_",-width,3,-outline,'red'),'',-fill,'red',-width,2);
+	  }
 	  $p->load;
-	  for (0..4) {$p->a_bottom("a$_")}
+	  for (0..4) {$p->a_bottom(["a$_","o$_"])}
 	});
 
 $d->html("
@@ -206,6 +238,15 @@ in a file.
 saved.
 
 ");
+$d = $p->add('first-slide2',sub {
+	  title('My first slide');
+	  items('aaa','As an artist',-font,$p->f2);
+	  $p->Text('t1',"My first Tk::SlideShow slide");
+	  $p->Text('t2',"This is simple");
+	  $p->Text('t3',"This is simplist");
+	  
+	  $p->load;
+	});
 
 if (grep (/-html/,@ARGV)) {
   $p->html("doc");
@@ -214,10 +255,3 @@ if (grep (/-html/,@ARGV)) {
 
 $p->current(shift || 0);
 $p->play;
-
-
-
-
-
-
-

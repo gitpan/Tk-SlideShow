@@ -1,30 +1,13 @@
 package Tk::SlideShow::DblArrow;
 
 @Tk::SlideShow::DblArrow::ISA = qw(Tk::SlideShow::Arrow);
-Tk::SlideShow::Placeable->AddClass('Tk::SlideShow::DblArrow');
 
 sub New {
   my $class = shift;
   my $s = $class->SUPER::New(@_);
+  $s->{'-arrowoptions'}[1] = 'both';
   bless $s;
-}
-
-sub trace_link {
-  my ($s,$fx,$fy,$tx,$ty) = @_;
-  my $id = $s->id;
-
-  my $can = Tk::SlideShow->canvas;
-  $can->createLine($fx,$fy,$tx,$ty,-arrow,'both',
-		   '-arrowshape', $s->shape,
-		   '-width', $s->width,
-		   -tags,$id);
-  if ($s->titre) {
-    my $wid = $can->createText(($fx+$tx)/2,($fy+$ty)/2,'-text',$s->titre, -tags,$id);
-    $can->createRectangle($can->bbox($wid),-fill,'lightYellow',-outline,'red',-tags,$id);
-    $can->raise($wid);
-  }
-
+  $s->trace_link(-100,-100,-10,-10);
   return $s;
 }
-
 1;
