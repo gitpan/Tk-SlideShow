@@ -25,12 +25,29 @@ sub New {
   my $c = Tk::SlideShow->canvas;
   $c->CanvasBind('Tk::SlideShow','<Up>',[\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,0,1]);
   $c->CanvasBind('Tk::SlideShow','<Control-Up>',[\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,0,-1]);
-  $c->CanvasBind('Tk::SlideShow','<Down>',[\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,1,1]);
-  $c->CanvasBind('Tk::SlideShow','<Control-Down>',[\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,1,-1]);
-  $c->CanvasBind('Tk::SlideShow','<Left>',[\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,2,1]);
-  $c->CanvasBind('Tk::SlideShow','<Control-Left>',[\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,2,-1]);
-  $c->CanvasBind('Tk::SlideShow','<Right>',[\&Tk::SlideShow::exec_if_current,$id,$chwidth,$s,1]);
+  Tk::SlideShow->addkeyhelp('Press <Up> key on an arroww',
+			      'to increase the distance along the line from the neck of the arrowhead to its tip.');
+  Tk::SlideShow->addkeyhelp('Press <Control-Up> key on an arroww',
+			      'to decrease the distance along the line from the neck of the arrowhead to its tip.');
+
+  $c->CanvasBind('Tk::SlideShow','<Down>',         [\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,1,1]);
+  $c->CanvasBind('Tk::SlideShow','<Control-Down>', [\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,1,-1]);
+  Tk::SlideShow->addkeyhelp('Press <Down> key on an arroww',
+			      'to increase the distance along the line from the trailing points of the arrowhead to the tip.');
+  Tk::SlideShow->addkeyhelp('Press <Control-Down> key on an arrow',
+			      'to decrease the distance along the line from the trailing points of the arrowhead to the tip.');
+  $c->CanvasBind('Tk::SlideShow','<Left>',         [\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,2,1]);
+  $c->CanvasBind('Tk::SlideShow','<Control-Left>', [\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,2,-1]);
+  Tk::SlideShow->addkeyhelp('Press <Left> key on an arrow',
+			      'to increase the distance from the outside edge of the line to the trailing points.');
+  Tk::SlideShow->addkeyhelp('Press <Control-Left> key on an arrow',
+			      'to decrease the distance from the outside edge of the line to the trailing points.');
+  $c->CanvasBind('Tk::SlideShow','<Right>',        [\&Tk::SlideShow::exec_if_current,$id,$chwidth,$s,1]);
   $c->CanvasBind('Tk::SlideShow','<Control-Right>',[\&Tk::SlideShow::exec_if_current,$id,$chwidth,$s,-1]);
+  Tk::SlideShow->addkeyhelp('Press <Right> key on an arroww',
+			      'to increase the width.');
+  Tk::SlideShow->addkeyhelp('Press <Control-Right> key on an arroww',
+			      'to decrease the width.');
   return $s;
 }
 
@@ -63,6 +80,7 @@ sub trace_link {
   my ($s,$fx,$fy,$tx,$ty) = @_;
   my $id = $s->id;
 
+  my $can = Tk::SlideShow->canvas;
   $can->createLine($fx,$fy,$tx,$ty,-arrow,'last',
 		   '-arrowshape', $s->shape,
 		   '-width', $s->width,

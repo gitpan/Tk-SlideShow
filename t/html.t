@@ -12,6 +12,8 @@ my $d = $p->add('html',
 	sub {
 	  $p->Text('doc',"Html doc\nadding/producing\nis possible",
 		  -font, $p->f3);
+	  $p->Text('smile',"Smile please, I'm just snapshot'ing your slides ...",
+		  -font, $p->f1);
 	  $p->load;
 	});
 

@@ -74,25 +74,29 @@ sub chpos {
     unless defined $s->{'multipos'}[$i];
   my ($destx,$desty) = @{$s->{'multipos'}[$i]};
   # number of pixel per second
-  my $speed = $options{'-speed'} || 500;
+  my $speed = $options{'-speed'} || 1000;
   my $distance = (($destx-$x)**2+($desty-$y)**2)**.5;
-  #printf ("deplacement de %d,%d a $destx,$desty\n",$x,$y);
-  my $steps = $options{'-steps'} || 50;
+#  printf ("deplacement de %d,%d a $destx,$desty\n",$x,$y);
+  my $steps = $options{'-steps'} || 5;
   my $step = int($distance/$steps);
   my $dt = $distance / $speed;
-  #print "dt=$dt  distance=$distance step=$step\n";
+#  print "dt=$dt  distance=$distance step=$step\n";
   my ($x0,$y0) = ($x,$y);
   my $dx = ($destx-$x0)/$step;
   my $dy = ($desty-$y0)/$step;
-  for (my $t=1; $t<=$step; $t++) {
+  sub smallmove {
+    my ($can,$tag,$t,$step,$x0,$y0,$x,$y,$dx,$dy,$dt) = @_;
     my $tx = $x0+$t*$dx;
     my $ty = $y0+$t*$dy;
     my ($tdx,$tdy)  = (int($tx-$x),int($ty-$y));
     $can->move($tag,$tdx,$tdy);
     $x += $tdx; $y += $tdy;
     $can->update;
-    select(undef,undef,undef,$dt/$step);
+    $can->after(int($dt/$step*1000),
+		[\&smallmove,$can,$tag,$t+1,$step,$x0,$y0,$x,$y,$dx,$dy,$dt])
+      if $t <= $step ;
   }
+  smallmove($can,$tag,1,$step,$x0,$y0,$x,$y,$dx,$dy,$dt);
   ($s->{'x'},$s->{'y'}) = ($destx, $desty);
   $s->{'curposindex'} = $i;
 }
@@ -120,6 +124,8 @@ sub text {
   my $fontmenu; my $lbox;
   my ($curit, $cursp);
   sub initFontChooser {
+    Tk::SlideShow->addkeyhelp('Double-Click Button 1 on text items',
+			      'to access font chooser');
     my $can = Tk::SlideShow->canvas;
     my $mw = Tk::SlideShow->mw;
     open(FONT,"xlsfonts |") or die;
@@ -134,7 +140,6 @@ sub text {
 		  if (defined $curit and defined $cursp) {
 		    my $font = $can->itemcget($curit,-font);
 		    $font->configure('-family',$f[$fontindex]);
-		    #print "on passe a la fontindex=$fontindex :".$f[$fontindex]."\n";
 		    $cursp->{-font} = $f[$fontindex];
 		  }
 		  #print "item = $curit\n";
@@ -174,6 +179,8 @@ sub text {
   my ($curit, $cursp);
 
   sub initColorChooser {
+    Tk::SlideShow->addkeyhelp('Double-Click Button 3 on canvas items',
+			      'to access color chooser');
     my $can = Tk::SlideShow->canvas;
     my $mw = Tk::SlideShow->mw;
     $colormenu = $mw->Menu;
@@ -244,6 +251,9 @@ sub anim {
   my $mw = Tk::SlideShow->mw;
   my $im = $mw->Animation('-format' => 'gif',-file => $fn);
   $im->start_animation($freq) if $s->{'state'};
+  Tk::SlideShow->addkeyhelp('Click Button 3 on animated gif',
+			      'to toggle animation');
+
   $c->bind($id,'<3>',
 	   [ sub { 
 	       my ($c,$s,$im) = @_;

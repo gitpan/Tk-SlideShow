@@ -15,6 +15,7 @@ sub trace_link {
   my $id = $s->id;
 
   my $midy = int(($fy+$ty)/2);
+  my $can = Tk::SlideShow->canvas;
   $can->createLine($fx,$fy,$fx,$midy,$tx,$midy,$tx,$ty,-tags,$id);
   return $s;
 }

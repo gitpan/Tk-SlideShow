@@ -12,6 +12,7 @@ package Tk::SlideShow::Placeable;
 use vars qw(@ISA @classes);
 @ISA = qw(Tk::SlideShow::Dict);
 
+
 sub New {
   my ($class,$id) = @_;
   die "An mandatory id is needed !" unless defined $id;
@@ -105,6 +106,7 @@ use Cwd;
 sub save {
   shift;
   my $slides = shift;
+
   my $numero = $slides->currentName;
   my $dfltfname = "slide-$numero.pl";
   my %files = ();
@@ -135,10 +137,17 @@ sub Clean {
     }
   }
 }
+
+
 sub pan {
   my ($s,$button) = @_;
   my $c = Tk::SlideShow->canvas;
+  Tk::SlideShow->addkeyhelp('Press Button 1 and move, on canvas items',
+			    'to drag them');
   my $id = $s->id;
+  Tk::SlideShow->addkeyhelp("Press Ctrl-Button 1 on canvas items",
+			      'to lower them');
+
   $c->bind($id,"<Control-$button>", sub {$c->lower($id)});
   $c->bind($id,"<$button>", 
 	   sub { 

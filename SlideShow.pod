@@ -840,22 +840,32 @@ You can easily make box entities hyperlinks to slides.
 As far as I am concerned, I feel that considering a paper copy of
 slides as a documentation of a presentation is non sense. You have to
 add your speach added value to it. That why, I like to add to my
-presentation, a documentation to each slides. This helps also to
+presentation, a documentation to each slides. This helps me also to
 prepare the presentation.
 
-To add documentation to my slides, I have choosen to use LaTeX as a
+To add documentation to my slides, I have choosen to use html as a
 language. Maybe in a future release, somebody else will want to
-express attach documentation to slide in a différent language. 
+express attach documentation to slide in a different language (maybe
+pod).
 
-So, that's the reason for the method C<latex> on a
+So, that's the reason for the method C<html> on a
 C<Tk::SlideShow::Diapo> object.
 
 To let you add an header and a footer of to your presentation paper, I
-have added 2 methods for the C<Tk::SlideShow> object : C<latexheader> and C<latexfooter>.
+have added 2 methods for the C<Tk::SlideShow> object : C<htmlheader>
+and C<htmlfooter>.
 
 To output the whole documentation on a file, you may use the method
-C<latex> on the C<Tk::SlideShow> object (note that this is not on the
-C<Tk::SlideShow::Diapo> object this time).
+C<html> on the C<Tk::SlideShow> object (note that this is not on the
+C<Tk::SlideShow::Diapo> object this time). This method take the name
+of a directory where it will produce differents snapshots of your
+slides, plus HTML documentation explicitly attached to each slides (or
+Tk::SlideShow::Diapo).
+
+Note that the technic used to snapshot your slides is by using the X11
+command C<xwd>. Then it is converted in PNG image format, so that your
+images will be viewable on most of browsers.
+
 
 So to sumarize this here's the look of a more complete example of a
 C<Tk::SlideShow> script :
@@ -867,17 +877,17 @@ C<Tk::SlideShow> script :
         my ($mw,$c,$h,$w) = ($p->mw, $p->canvas, $p->h, $p->w);
 	my $d; # stands for a diapo.
 	$d = $p->add('menu',         sub { ...; $p->load });
-	$d->latex('blah blah on the menu slide');
+	$d->html('blah blah on the menu slide');
 	$d = $p->add('introduction', sub { ...; $p->load });
-	$d->latex('blah blah on the introduction slide');
+	$d->html('blah blah on the introduction slide');
 	...
 	$d = $p->add('development',  sub { ...; $p->load });
-	$d->latex('blah blah on the development slide');
+	$d->html('blah blah on the development slide');
 	$d = $p->add('conclusion',   sub { ...; $p->load });
-	$d->latex('blah blah on the conclusion slide');
+	$d->html('blah blah on the conclusion slide');
 
-	if (grep (/-latex/,@ARGV)) {
-	  $p->latex("doc.tex");
+	if (grep (/-html/,@ARGV)) {
+	  $p->html("doc");
 	  exit 0;
 	}
 
@@ -900,7 +910,7 @@ C<SlideShow.pm> used, not to far.
 				# to the current screen
   $p->bg(?sub|color?);          # change background 
   my $d = $p->add(?'nom',sub);  # add a slide
-  $d->latex('..');		# add latex documentation
+  $d->html('..');		# add html documentation
   my ($mw,$c,$h,$w) = ($p->mw,$p->canvas,$p->h,$p->w);
 				# retrieve context variables 
   $p->current(?slideid);	# retrieve/set current slide
@@ -924,9 +934,9 @@ C<SlideShow.pm> used, not to far.
 			# make the spriteid evolve on a button 3 click thru 
 			# up to nbposition
 
-  $p->latex('toto.tex')	# produces on complete latex documentation
-  $p->latexheader(?header?);
-  $p->latexfooter(?footer?);
+  $p->html('directory')	# produces on complete html documentation
+  $p->htmlheader(?header?);
+  $p->htmlfooter(?footer?);
 			# get/set documentation header/footer
 
 =head2 C<Sprites>

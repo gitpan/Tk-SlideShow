@@ -1,4 +1,6 @@
 
+use strict;
+
 package Tk::SlideShow::Link;
 
 @Tk::SlideShow::Link::ISA = qw(Tk::SlideShow::Placeable);
@@ -92,6 +94,7 @@ sub show {
 sub trace_link {
   my ($s,$fx,$fy,$tx,$ty) = @_;
   my $id = $s->id;
+  my $can =  Tk::SlideShow->canvas;
 
   $can->createLine($fx,$fy,$tx,$ty,-tags,$id);
   if ($s->titre) {

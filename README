@@ -40,6 +40,21 @@ ex1, ex2, ...
 
 =head1 CHANGE
 
+=head2 since 0.03
+
+=item parallel shift
+
+add the ability to "shift" several sprites together
+
+=item bugs 
+
+fix some
+
+=item update documentation 
+
+but not yet complete. Ask me for some more explaination if needed.
+
+
 =head2 since 0.02
 
 =over 2

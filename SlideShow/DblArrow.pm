@@ -13,6 +13,7 @@ sub trace_link {
   my ($s,$fx,$fy,$tx,$ty) = @_;
   my $id = $s->id;
 
+  my $can = Tk::SlideShow->canvas;
   $can->createLine($fx,$fy,$tx,$ty,-arrow,'both',
 		   '-arrowshape', $s->shape,
 		   '-width', $s->width,

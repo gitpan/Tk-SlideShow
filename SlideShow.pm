@@ -11,6 +11,10 @@ use Tk::SlideShow::Dict;
 use Tk::SlideShow::Placeable;
 use Tk::SlideShow::Diapo;
 use Tk::SlideShow::Sprite;
+use Tk::SlideShow::Link;
+use Tk::SlideShow::Arrow;
+use Tk::SlideShow::DblArrow;
+use Tk::SlideShow::Org;
 
 
 $SIG{__DIE__} = sub { print &pile;};
@@ -30,7 +34,7 @@ package Tk::SlideShow;
 
 use vars qw($VERSION);
 
-$VERSION='0.03';
+$VERSION='0.04';
 
 my ($can,$H,$W,$xprot,$present);
 my $mainwindow;
@@ -149,6 +153,9 @@ sub warp {
 }
 
 sub save {
+  Tk::SlideShow->addkeyhelp('Press s',
+			      'To save sprite positions');
+
   $mainwindow->Tk::bind('Tk::SlideShow','<s>', [\&Tk::SlideShow::Placeable::save,$present]);
 }
 
@@ -202,6 +209,41 @@ sub warppointer {
   $xprot->WarpPointer(0, hex($can->id), 0, 0, 0, 0, $x, $y);
 }
 
+# this sub create a popup window with key binding help
+{
+  my %help;
+  my $helpmenu;
+  use Tk::DialogBox;
+  sub addkeyhelp {
+    shift if $_[0] eq 'Tk::SlideShow';
+    my ($key,$texthelp) = @_;
+    $help{$key} = $texthelp;
+  }
+  sub inithelpmenu {
+    print "Initialising help menu\n";
+    my $m = $mainwindow;
+    $helpmenu = $m->DialogBox(-title,'Help',-buttons,['OK']);
+    my $f = $helpmenu->add('Frame')->pack;
+    my $t = $f->Scrolled('Text')->pack->Subwidget('text');
+    $t->configure(-font,f0_5(),-height,20,-width,60);
+    $t->tagConfigure('key',-foreground,'red');
+    $t->tagConfigure('desc',-foreground,'blue');
+
+    for (sort keys %help) {
+      $t->insert('end',$_,'key',"\t$help{$_}",'desc',"\n");
+    }
+  }
+  
+  sub posthelp {
+    print "posting menu\n";
+    my $c = Tk::SlideShow->canvas;
+    my $e = $c->XEvent;
+    inithelpmenu unless defined $helpmenu;
+    $helpmenu->Show;
+    print "menu posted\n";
+  }
+  
+}
 
 sub init_bindings {
   shift;
@@ -212,14 +254,22 @@ sub init_bindings {
   $c->bind('all', '<Any-Leave>' => \&leave);
   $c->CanvasFocus;
   $m->Tk::bind('Tk::SlideShow','<3>', \&shiftaction);
+  addkeyhelp('Click Button 3','To let slide evole one step');
   $m->Tk::bind('Tk::SlideShow','<Control-3>', \&unshiftaction);
+  addkeyhelp('Click Ctrl-Button 3','To let slide evole one step back');
   $m->Tk::bind('Tk::SlideShow','<KeyPress-space>', $setnextslide);
+  addkeyhelp('Press Space bar','to go to the next slide');
   $m->Tk::bind('Tk::SlideShow','<KeyPress-BackSpace>', $setprevslide);
+  addkeyhelp('Press BackSpace','to go to the previous slide');
   $m->Tk::bind('Tk::SlideShow','<Alt-q>', sub {$m->destroy; exit});
   $m->Tk::bind('Tk::SlideShow','<Meta-q>', sub {$m->destroy; exit});
   $m->Tk::bind('Tk::SlideShow','<q>', sub {$m->destroy; exit});
+  addkeyhelp('Press q','to quit');
   $m->Tk::bind('Tk::SlideShow','<p>', \&postscript);
+  $m->Tk::bind('Tk::SlideShow','<h>', \&posthelp);
+  addkeyhelp('Press h','to get this help');
 }
+
 
 #internals
 sub trace_fond {
@@ -256,53 +306,34 @@ sub clean {
   return $class;
 }
 
-sub a_warp {
-  my ($class,@tags) = @_;
-  for my $tag (@tags) {
-    my $bottom = ($can->bbox($tag))[3];
-    $can->move($tag,0,0-$bottom);
-    push @{$present->{'action'}},[$tag,'a_warp',$bottom];
-  }
-  return $class;
+sub a_warp {(shift)->arrive('direct',0,$H,@_); }
+sub l_warp {(shift)->arrive('direct',0,-$H,@_); }
+sub a_top  {(shift)->arrive('smooth',0,$H,@_); }
+sub l_top  {(shift)->arrive('smooth',0,-$H,@_); }
+sub a_bottom{(shift)->arrive('smooth',0,-$H,@_);}
+sub l_bottom{(shift)->arrive('smooth',0,$H,@_);}
+sub a_left{(shift)->arrive('smooth',$W,0,@_);}
+sub l_left{(shift)->arrive('smooth',-$W,0,@_);}
+sub a_right{(shift)->arrive('smooth',-$W,0,@_);}
+sub l_right{(shift)->arrive('smooth',$W,0,@_);}
+
+sub visible {
+  my ($can,$tag) = @_;
+  my ($b0,$b1,$b2,$b3) = $can->bbox($tag);
+  return  ($b2 < 0 or $b3 < 0 or $b0 > $W or $b1 > $H ) ?
+    0 : 1 ;
 }
 
-sub a_top {
-  my ($class,@tags) = @_;
-  return unless $mode eq 'X11';
+sub arrive {
+  my ($class,$maniere,$dx,$dy,@tags) = @_;
+  return  unless $mode eq 'X11';
   for my $tag (@tags) {
-    my $bottom = ($can->bbox($tag))[3];
-    $can->move($tag,0,0-$bottom);
-    push @{$present->{'action'}},[$tag,'a_top',$bottom];
-  }
-  return $class;
-}
-sub a_bottom {
-  my ($class,@tags) = @_;
-  return unless $mode eq 'X11';
-  for my $tag (@tags) {
-    my $top = ($can->bbox($tag))[1];
-    $can->move($tag,0,$H-$top);
-    push @{$present->{'action'}},[$tag,'a_bottom',$top];
-  }
-  return $class;
-}
-sub a_left {
-  my ($class,@tags) = @_;
-  return unless $mode eq 'X11';
-  for my $tag (@tags) {
-    my $right = ($can->bbox($tag))[2];
-    $can->move($tag,0-$right,0);
-    push @{$present->{'action'}},[$tag,'a_left',$right];
-  }
-  return $class;
-}
-sub a_right {
-  my ($class,@tags) = @_;
-  return unless $mode eq 'X11';
-  for my $tag (@tags) {
-    my $left = ($can->bbox($tag))[0];
-    $can->move($tag,$W-$left,0);
-    push @{$present->{'action'}},[$tag,'a_right',$left];
+    if (ref($tag) eq 'ARRAY') {
+      for (@$tag) {$can->move($_,-$dx,-$dy) if visible($can,$_);}
+    } else { 
+      $can->move($tag,-$dx,-$dy) if visible($can,$tag);
+    }
+    push @{$present->{'action'}},[$tag,$maniere,$dx,$dy];
   }
   return $class;
 }
@@ -319,27 +350,43 @@ sub shiftaction {
   my $c = $can;
   return unless $a;
   push @{$present->{'save_action'}},$a;
-  my ($tag,$maniere,$dest) = @$a;
+  @_ = (@$a);
+  my $tag = shift;
+  my $maniere = shift;
   my $step = 50;
-  $maniere eq 'a_top'  and 
-    do {for(my $i=0;$i<$step;$i++){$c->move($tag,0,$dest/$step); $c->update;}};
-  $maniere eq 'a_bottom' 
-    and do {for(my $i=0;$i<$step;$i++){$c->move($tag,0,($dest-$H)/$step); $c->update;}};
-  $maniere eq 'a_left'
-    and do {for(my $i=0;$i<$step;$i++){$c->move($tag,$dest/$step,0); $c->update;}};
-  $maniere eq 'a_right'
-    and do {for(my $i=0;$i<$step;$i++){$c->move($tag,($dest-$W)/$step,0); $c->update;}};
-  $maniere eq 'a_warp'
-    and do {$c->move($tag,0,$dest);};
+  $maniere eq 'smooth'  and 
+    do {
+      my ($dx,$dy) = @_;
+      for(my $i=0;$i<$step;$i++){
+	if (ref($tag) eq 'ARRAY') {
+	  for (@$tag) {$c->move($_,$dx/$step,$dy/$step);}
+	} else { $c->move($tag,$dx/$step,$dy/$step);}
+	$c->update;
+      }
+    };
+  $maniere eq 'direct' and 
+    do {
+      my ($dx,$dy) = @_;
+      if (ref($tag) eq 'ARRAY') {
+	for (@$tag) {$c->move($_,$dx,$dy);}
+      } else { $c->move($tag,$dx,$dy);}
+      $c->update;
+    };
   $maniere eq 'a_chpos' and 
     do {
-      my ($tag,$m,$i,@options) = @$a;
+      my ($i,@options) = @_;
       #print "doing $m on tag $tag i=$i\n";
-      my $sprite = Tk::SlideShow::Sprite->Get($tag);
-      $sprite->chpos($i,@options);
+      my $sprite;
+      if (ref($tag) eq 'ARRAY') {
+	for (@$tag) {
+	  $sprite = Tk::SlideShow::Sprite->Get($_);
+	  $sprite->chpos($i,@options);
+	}
+      } else {
+	$sprite = Tk::SlideShow::Sprite->Get($tag);
+	$sprite->chpos($i,@options);
+      }
     };
-      
-
 }
 sub unshiftaction {
   my $a = pop @{$present->{'save_action'}};
@@ -499,25 +546,25 @@ sub html {
     &{$diapo->code};
     $mainwindow->update;
     my $fxwd_name = "/tmp/tkss.$$.xwd";
-    my $fpng_name = "$dirname/$name.png";
-    my $fmpng_name = "$dirname/m.$name.png";
-    my $fspng_name = "$dirname/s.$name.png";
+    my $f_name = "$dirname/$name.gif";
+    my $fm_name = "$dirname/m.$name.gif";
+    my $fs_name = "$dirname/s.$name.gif";
     my $title = $mainwindow->title;
     print "Snapshooting it (xwd -name $title -out $fxwd_name)\n";
     system("xwd -name $title -out $fxwd_name");
-    print "Converting to png\n";
-    system("convert $fxwd_name $fpng_name");
+    print "Converting to gif\n";
+    system("convert $fxwd_name $f_name");
     my ($w,$h) = ($s->w,$s->h);
     my ($mw,$mh) = (int($w/2),int($h/2));
-    print "Rescaling it for medium png (${mw}x${mh}) access\n";
-    system("convert -sample ${mw}x${mh} $fpng_name $fmpng_name");
+    print "Rescaling it for medium gif (${mw}x${mh}) access\n";
+    system("convert -sample ${mw}x${mh} $f_name $fm_name");
     my ($sw,$sh) = (int($w/4),int($h/4));
-    print "Rescaling it for small png (${sw}x${sh}) access\n";
-    system("convert -sample ${sw}x${sh} $fpng_name $fspng_name");
+    print "Rescaling it for small gif (${sw}x${sh}) access\n";
+    system("convert -sample ${sw}x${sh} $f_name $fs_name");
     print INDEX "<li> <a href='$name.html'> $name  </a></li><br> 
-                 <a href=m.$name.png> <img src=s.$name.png> </a> \n";
+                 <a href=m.$name.gif> <img src=s.$name.gif> </a> \n";
     open(HTML,">$dirname/$name.html") or die "$!";
-    print HTML "<img src=$name.png><br>\n";
+    print HTML "<img src=$name.gif><br>\n";
     print HTML $diapo->html;
     close HTML;
   }
@@ -564,243 +611,6 @@ sub Anim {return Tk::SlideShow::Sprite::anim(@_);}
 
 sub TickerTape {return Tk::SlideShow::Sprite::tickertape(@_);}
 sub Compuman {return Tk::SlideShow::Sprite::compuman(@_);}
-
-
-
-
-package Tk::SlideShow::Link;
-@Tk::SlideShow::Link::ISA = qw(Tk::SlideShow::Placeable);
-Tk::SlideShow::Placeable->AddClass('Tk::SlideShow::Link');
-
-sub New {
-  my ($class,$from,$to,$titre) = @_;
-  $to = Tk::SlideShow::Sprite->point($from->id."-to") unless $to;
-  my $id = sprintf("%s-%s",$from->id,$to->id);
-  my $s =  bless {'from'=>$from, 'to'=>$to, 'id'=> $id, 'titre' => $titre || "",
-		 'tpos' => 0, 'fpos' => 0};
-  $class->Set($id,$s);
-  $from->addLink($s);
-  $to->addLink($s);
-  $s->show;
-  $s->bind;
-  return $s;
-}
-sub bind {
-  my $s = shift;
-  my $c = Tk::SlideShow->canvas ;
-  my $id = $s->id;
-  my $movepos = sub {
-    my $e = (shift)->XEvent;
-    my ($id,$incr) = @_;
-    $c->raise($id);
-    my ($x,$y) = ($c->canvasx($e->x),$c->canvasy($e->y));
-    if ((abs($s->fx - $x)+abs($s->fy-$y)) >
-	(abs($s->tx - $x)+abs($s->ty-$y))) {
-      $s->{'tpos'} += $incr;
-      my ($x,$y) = $s->to->pos($s->tpos);
-      Tk::SlideShow::warppointer($x,$y);
-    } else {
-      $s->{'fpos'} += $incr;
-      my ($x,$y) = $s->from->pos($s->fpos);
-      Tk::SlideShow::warppointer($x,$y);
-    }
-    $s->show;
-  };
-  $c->bind($id,"<1>", [$movepos, $id, 1]);
-  $c->bind($id,"<3>", [$movepos, $id,-1]);
-
-}
-sub from { return (shift)->{'from'} }
-sub to { return (shift)->{'to'} }
-sub titre { return (shift)->{'titre'} }
-sub id { return (shift)->{'id'} }
-sub fpos { return (shift)->var_getset('fpos',(shift))}
-sub tpos { return (shift)->var_getset('tpos',(shift))}
-sub ftpos {
-  my ($s,$f,$t) = @_;
-  $s->{'fpos'}=$f;
-  $s->{'tpos'}=$t;
-  $s->show;
-  return $s;
-}
-sub fx { return (shift)->{'fx'} }
-sub fy { return (shift)->{'fy'} }
-sub tx { return (shift)->{'tx'} }
-sub ty { return (shift)->{'ty'} }
-
-sub show {
-  my $s = shift;
-
-  my $from = $s->from;
-  my $to = $s->to;
-
-  my $can = Tk::SlideShow->canvas;
-  my $id = $s->id;
-  
-  $can->delete($s->id);
-  my $fpos = $s->fpos % 8;
-  my ($fx,$fy) = $from->pos($fpos);
-  $s->{'fpos'} = $fpos;
-  $s->{'fx'} = $fx;
-  $s->{'fy'} = $fy;
-
-  my $tpos = $s->tpos % 8;
-  my ($tx,$ty) = $to->pos($tpos);
-  $s->{'tpos'} =$tpos;
-  $s->{'tx'} = $tx;
-  $s->{'ty'} = $ty;
-
-#  print "createline ($fx,$fy,$tx,$ty)\n";
-  $s->trace_link($fx,$fy,$tx,$ty);
-
-  return $s;
-}
-
-sub trace_link {
-  my ($s,$fx,$fy,$tx,$ty) = @_;
-  my $id = $s->id;
-
-  $can->createLine($fx,$fy,$tx,$ty,-tags,$id);
-  if ($s->titre) {
-    my $wid = $can->createText(($fx+$tx)/2,($fy+$ty)/2,'-text',$s->titre, -tags,$id);
-    $can->createRectangle($can->bbox($wid),-fill,'lightYellow',-outline,'red',-tags,$id);
-    $can->raise($wid);
-  }
-}
-
-sub evalplace {
-  my $s = shift;
-  return sprintf("ftpos(%d,%d)",$s->fpos,$s->tpos);
-}
-
-package Tk::SlideShow::Arrow;
-@Tk::SlideShow::Arrow::ISA = qw(Tk::SlideShow::Link);
-Tk::SlideShow::Placeable->AddClass('Tk::SlideShow::Arrow');
-
-my $chshape = sub  {
-  my ($s,$what,$how) = @_;
-  $s->{'shape'}[$what]+=$how;
-  $s->show;
-};
-
-my $chwidth = sub  {
-  my ($s,$how) = @_;
-  $s->{'width'} +=$how;
-  $s->show;
-};
-
-sub New {
-  my $class = shift;
-  my $s = $class->SUPER::New(@_);
-  bless $s;
-  $s->{'shape'}=[8,10,3];
-  $s->{'width'} = 1;
-
-  my $id = $s->id;
-  my $c = Tk::SlideShow->canvas;
-  $c->CanvasBind('Tk::SlideShow','<Up>',[\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,0,1]);
-  $c->CanvasBind('Tk::SlideShow','<Control-Up>',[\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,0,-1]);
-  $c->CanvasBind('Tk::SlideShow','<Down>',[\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,1,1]);
-  $c->CanvasBind('Tk::SlideShow','<Control-Down>',[\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,1,-1]);
-  $c->CanvasBind('Tk::SlideShow','<Left>',[\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,2,1]);
-  $c->CanvasBind('Tk::SlideShow','<Control-Left>',[\&Tk::SlideShow::exec_if_current,$id,$chshape,$s,2,-1]);
-  $c->CanvasBind('Tk::SlideShow','<Right>',[\&Tk::SlideShow::exec_if_current,$id,$chwidth,$s,1]);
-  $c->CanvasBind('Tk::SlideShow','<Control-Right>',[\&Tk::SlideShow::exec_if_current,$id,$chwidth,$s,-1]);
-  return $s;
-}
-
-sub evalplace {
-  my $s = shift;
-  return sprintf("ftpos(%d,%d)->width(%d)->shape(%d,%d,%d)",
-		 $s->fpos,$s->tpos,$s->width,@{$s->shape});
-}
-
-sub shape {
-  my ($s,@vals) = @_;
-  if (defined @vals and @vals == 3) {
-    $s->{'shape'} = [@vals];
-    $s->show;
-    return $s;
-  }
-  return $s->{'shape'};
-}
-sub width {
-  my ($s,$val) = @_;
-  if (defined $val) {
-    $s->{'width'} = $val;
-    $s->show;
-    return $s;
-  }
-  return $s->{'width'};
-}
-
-sub trace_link {
-  my ($s,$fx,$fy,$tx,$ty) = @_;
-  my $id = $s->id;
-
-  $can->createLine($fx,$fy,$tx,$ty,-arrow,'last',
-		   '-arrowshape', $s->shape,
-		   '-width', $s->width,
-		   -tags,$id);
-  if ($s->titre) {
-    my $wid = $can->createText(($fx+$tx)/2,($fy+$ty)/2,'-text',$s->titre, -tags,$id);
-    $can->createRectangle($can->bbox($wid),-fill,'lightYellow',-outline,'red',-tags,$id);
-    $can->raise($wid);
-  }
-
-  return $s;
-}
-
-package Tk::SlideShow::DblArrow;
-
-@Tk::SlideShow::DblArrow::ISA = qw(Tk::SlideShow::Arrow);
-Tk::SlideShow::Placeable->AddClass('Tk::SlideShow::DblArrow');
-
-sub New {
-  my $class = shift;
-  my $s = $class->SUPER::New(@_);
-  bless $s;
-}
-
-sub trace_link {
-  my ($s,$fx,$fy,$tx,$ty) = @_;
-  my $id = $s->id;
-
-  $can->createLine($fx,$fy,$tx,$ty,-arrow,'both',
-		   '-arrowshape', $s->shape,
-		   '-width', $s->width,
-		   -tags,$id);
-  if ($s->titre) {
-    my $wid = $can->createText(($fx+$tx)/2,($fy+$ty)/2,'-text',$s->titre, -tags,$id);
-    $can->createRectangle($can->bbox($wid),-fill,'lightYellow',-outline,'red',-tags,$id);
-    $can->raise($wid);
-  }
-
-  return $s;
-}
-
-
-package Tk::SlideShow::Org;
-@Tk::SlideShow::Org::ISA = qw(Tk::SlideShow::Link);
-Tk::SlideShow::Placeable->AddClass('Tk::SlideShow::Org');
-
-sub New {
-  my $class = shift;
-  my $s = $class->SUPER::New(@_);
-  $s->{'fpos'} = 5;
-  $s->{'tpos'} = 1;
-  bless $s;
-}
-
-sub trace_link {
-  my ($s,$fx,$fy,$tx,$ty) = @_;
-  my $id = $s->id;
-
-  my $midy = int(($fy+$ty)/2);
-  $can->createLine($fx,$fy,$fx,$midy,$tx,$midy,$tx,$ty,-tags,$id);
-  return $s;
-}
-
 
 1;
 

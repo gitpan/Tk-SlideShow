@@ -5,4 +5,5 @@ Tk::SlideShow::Sprite->Get('title')->place(287,61)->fontFamily('charter');
 Tk::SlideShow::Sprite->Get('b1')->place(228,382);
 Tk::SlideShow::Sprite->Get('a2')->place(116,458);
 Tk::SlideShow::Sprite->Get('b2')->place(251,529);
+Tk::SlideShow::Sprite->Get('help')->place(224,725);
 Tk::SlideShow::Sprite->Get('ti')->place(682,101);

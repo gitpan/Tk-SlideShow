@@ -3,16 +3,16 @@
 use Tk::SlideShow;
 use strict;
 
-my $P = Tk::SlideShow->init(1024,768) or die;
+my $p = Tk::SlideShow->init(1024,768) or die;
 
-$P->save;
+$p->save;
 
-my ($mw,$c,$h,$w) = ($P->mw, $P->canvas, $P->h, $P->w);
+my ($mw,$c,$h,$w) = ($p->mw, $p->canvas, $p->h, $p->w);
 my $d;
 
 sub title {
-  $P->Image('ti',"Xcamel.gif");
-  $P->Text('title',shift,-font,$P->f3);
+  $p->Image('ti',"Xcamel.gif");
+  $p->Text('title',shift,-font,$p->f3);
 }
 
 sub items {
@@ -20,19 +20,21 @@ sub items {
   for (split (/\n/,$items)) {
     s/^\s*//;
     s/\s*$//;
-    $P->Text($id,$_,@options);
+    $p->Text($id,$_,@options);
 	    $id++;
   }
 }
-$d = $P->add('summary',sub {
+$d = $p->add('summary',sub {
 	  title('Tk::SlideShow');
 	  my $c = 'a0';
 	  items('a0',"What ?\nWhy ?\nHow ?",
-		-font => $P->f2,-fill, 'red');
+		-font => $p->f2,-fill, 'red');
 	  items('b0',"a TkPerl alternative to PowerPoint\nPerl power\nBy examples",
-		-font => $P->f2,-fill, 'blue');
-	  $P->load;
-	  for (0..2) {$P->a_top("a$_"); $P->a_bottom("b$_");}
+		-font => $p->f2,-fill, 'blue');
+	  $p->TickerTape('help',"Press q to quit, h for key help, button 3 to progress in slide, space for next slide .... ",
+			 70,-font,$p->f1,-fill,'red');
+	  $p->load;
+	  for (0..2) {$p->a_top("a$_"); $p->a_bottom("b$_");}
 });
 
 $d->html("
@@ -92,9 +94,9 @@ learn another theory when explaining their's
 sub example {
   my ($id,$t,@options) = @_;
   $t =~ s/^\s+//; $t =~ s/\s+$//;
-  my $s = $P->newSprite($id);
+  my $s = $p->newSprite($id);
   $c->createText(0,0,-text,'Example',
-		 -font => $P->f1, -tags => $id, -anchor => 'sw');
+		 -font => $p->f1, -tags => $id, -anchor => 'sw');
   my $idw = $c->createText(0,0,-text,$t,@options, -tags => $id,
 			  -anchor => 'nw');
   $c->createRectangle($c->bbox($idw), -fill,'light green',-tags => $id);
@@ -105,24 +107,24 @@ sub example {
 
 #############################################################
 
-$d = $P->add('prerequisite',sub {
+$d = $p->add('prerequisite',sub {
 	  title('Prerequisite');
-	  example('ex',"use Tk::SlideShow;\nmy \$P= Tk::SlideShow->init(1024,768);\n\$P->save;",
-		  -font => $P->ff2
+	  example('ex',"use Tk::SlideShow;\nmy \$p= Tk::SlideShow->init(1024,768);\n\$p->save;",
+		  -font => $p->ff2
 		 );
 	  items('a0',"You have to know Perl and Tk !
                       Tell what your screen size is.
                       Ask for your Art to be saved.",
-		-font => $P->f2,-fill, 'red');
-	  $P->load;
-	  for (0..2) {$P->a_bottom("a$_")}
+		-font => $p->f2,-fill, 'red');
+	  $p->load;
+	  for (0..2) {$p->a_bottom("a$_")}
 	});
 
 $d->html("
 <h1>You have to know Perl/Tk</h1>
 
 Yes, there is no power in Tk::SlideShow. The power is in Perl and in Tk. You
-will reuse all what you have learn. That's the trick : Tkpp only takes
+will reuse all what you have learn. That's the trick : Tk::SlideShow only takes
 advantage of what you already know. Leave now this reading,
 un(til\|less) you know a little bit perl/Tk.
 
@@ -146,27 +148,27 @@ specified it. The class method \\texttt{\\bf save} is there to allow
 to save your interactive modification.
 
 ");
-$d = $P->add('first-slide',sub {
+$d = $p->add('first-slide',sub {
 	  title('My first slide');
 	  example('ex',
-		  q{$P->add('first-slide',
+		  q{$p->add('first-slide',
 sub {
-  $P->Text('t1',"My first Tk::SlideShow slide");
-  $P->Text('t2',"This is simple");
-  $P->Text('t3',"This is simplist");
-  $P->Load;
+  $p->Text('t1',"My first Tk::SlideShow slide");
+  $p->Text('t2',"This is simple");
+  $p->Text('t3',"This is simplist");
+  $p->Load;
 }
 },
-		  -font => $P->ff1
+		  -font => $p->ff1
 		 );
 	  items('a0',"Add a slide
 Give it a name,
 Give the sub
 Describe the texts
 Load the positions",
-		-font => $P->f2,-fill, 'blue');
-	  $P->load;
-	  for (0..4) {$P->a_bottom("a$_")}
+		-font => $p->f2,-fill, 'blue');
+	  $p->load;
+	  for (0..4) {$p->a_bottom("a$_")}
 	});
 
 $d->html("
@@ -206,12 +208,12 @@ saved.
 ");
 
 if (grep (/-html/,@ARGV)) {
-  $P->html("doc");
+  $p->html("doc");
   exit 0;
 }
 
-$P->current(shift || 0);
-$P->play;
+$p->current(shift || 0);
+$p->play;
 
 
 
