@@ -1,1 +1,1 @@
-Tk::SlideShow::Sprite->Get('titre')->place(319,73);
+Tk::SlideShow::Dict->Get('title')->place(694,680)->fontFamily('itc avant garde gothic');

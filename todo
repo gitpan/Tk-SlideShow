@@ -3,9 +3,11 @@
 - add a notion of library of sprite (autoload-able, and browsable) 
   Like compuman
 
-- add a gif sprite chooser with a library.
+- add a sprite chooser with a library.
 
 - Add a way of producing postscript of slides.
+
+- Add a Pie and Histogram Sprite 
 
 * Functionnalities
 

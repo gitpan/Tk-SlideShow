@@ -801,7 +801,7 @@ B<Sprite> ids starts with string C<som/> so that there IC will be stored
 in file C<som>.
 
 
-=head2 Exemple 2
+=head2 Example 2
 
 Imagine now that you would like to present your organisation.  You
 would like to show your organisation graph one each slide.
@@ -855,6 +855,8 @@ You can mix example 1 and 2,
 You can easily make box entities hyperlinks to slides.
 
 =back
+
+
 
 =head1 DOCUMENTATION
 
@@ -916,6 +918,16 @@ C<Tk::SlideShow> script :
 
 	$p->current(shift || 0);
 	$p->play;
+
+
+If you prefer to start your presentation as a wide template, and cut
+anything that is not useful, you may use the only exported method :
+C<template>. This will produce on the STDOUT a perl script that has
+some very general slides and subroutines. So to start a new
+presentation you may run :
+
+        perl -MTk::SlideShow -e template > mynewpresentationscript.pl
+
 
 
 =head1 SYNOPSIS

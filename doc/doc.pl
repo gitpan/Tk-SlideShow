@@ -11,6 +11,10 @@ my ($mw,$c,$h,$w) = ($p->mw, $p->canvas, $p->h, $p->w);
 my $d;
 
 $p->steps(10);
+$mw->Tk::bind('Tk::SlideShow','<Up>', sub { $c->move($p->current_item,0,-1);});
+$mw->Tk::bind('Tk::SlideShow','<Down>', sub { $c->move($p->current_item,0,1);});
+$mw->Tk::bind('Tk::SlideShow','<Right>', sub { $c->move($p->current_item,1,0);});
+$mw->Tk::bind('Tk::SlideShow','<Left>', sub { $c->move($p->current_item,-1,0);});
 
 sub title {
   $p->Image('ti',"Xcamel.gif");
@@ -97,7 +101,7 @@ learn another theory when explaining their's
 
 $d = $p->add('principles',sub {
 	  title('Principles');
-	  my @a = items('a0',"Take advantage of your computer kwnoledge
+	  my @a = items('a0',"Take advantage of your computer knowledge
 Be nearly unlimited in expression
 Solicite Architect & Artist that's in yourself
 Be coherent with your OpenSource choices",-font,$p->f2,-fill,'red');

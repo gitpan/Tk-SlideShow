@@ -3,7 +3,7 @@
 use SlideShow;
 use strict;
 	
-my $p = Tk::SlideShow->init(1024,768);
+my $p = Tk::SlideShow->init(1024,768) or die;
 $p->save;
 my ($mw,$c,$h,$w) = ($p->mw, $p->can, $p->h, $p->w);
 

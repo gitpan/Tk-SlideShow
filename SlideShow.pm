@@ -31,10 +31,11 @@ sub pile {
 
 #------------------------------------------------
 package Tk::SlideShow;
-
-use vars qw($VERSION);
-
-$VERSION='0.06';
+require Exporter;
+use vars qw($VERSION @EXPORT @ISA);
+@ISA=qw(Exporter);
+@EXPORT=qw(template);
+$VERSION='0.07';
 
 my ($can,$H,$W,$xprot,$present);
 my $mainwindow;
@@ -220,6 +221,16 @@ sub postscript {
 		   -pagewidth => "21.0c",
 		   -rotate => 1);
 }
+sub photos {
+    my $title = $mainwindow->title;
+    print "title $title\n";
+    my $nu = (lc $title).".00";
+    $nu++ while -f "$nu.gif";
+    my $cmd = "xwd -name $title| xwdtopnm | ppmtogif > $nu.gif";
+    print "command : $cmd\n";
+    system $cmd;
+
+}
 
 #internals
 sub warppointer {
@@ -285,6 +296,8 @@ sub init_bindings {
   $m->Tk::bind('Tk::SlideShow','<q>', sub {$m->destroy; exit});
   addkeyhelp('Press q','to quit');
   $m->Tk::bind('Tk::SlideShow','<p>', \&postscript);
+  $m->Tk::bind('Tk::SlideShow','<P>', \&photos);
+  $m->Tk::bind('Tk::SlideShow','<Up>', sub { print "curitem=$current_item"});
   $m->Tk::bind('Tk::SlideShow','<h>', \&posthelp);
   addkeyhelp('Press h','to get this help');
 }
@@ -697,7 +710,6 @@ my ($mw,$c,$h,$w) = ($p->mw, $p->canvas, $p->h, $p->w);
 my $d;
 
 #--------------------------------------------
-#--------------------------------------------
 $d = $p->add('summary',
 	     sub {
 	       title('First title');
@@ -710,18 +722,6 @@ $d = $p->add('summary',
 $d->html(" ");
 
 #--------------------------------------------
-#--------------------------------------------
-$d = $p->add('first',
-	     sub {
-	       title('Second');
-	       my @a = items('a0',"item1 \n item2 \n item3",
-			     -font,$p->f2,-fill,'red');
-	       $p->load;
-	       $p->a_left(@a);
-	     });
-
-
-$d->html(" ");
 
 sub title { $p->Text('title',shift,-font,$p->f3); }
 

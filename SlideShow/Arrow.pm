@@ -65,7 +65,7 @@ sub evalplace {
 
 sub shape {
   my ($s,@vals) = @_;
-  if (defined @vals and @vals == 3) {
+  if (scalar(@vals>0) and @vals == 3) {
     $s->{'shape'} = [@vals];
     Tk::SlideShow->canvas->itemconfigure($s->{'lineid'},'-arrowshape', [@vals] );
     return $s;

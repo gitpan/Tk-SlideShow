@@ -1,1 +1,1 @@
-Tk::SlideShow::Sprite->Get('title')->place(273,64);
+Tk::SlideShow::Dict->Get('title')->place(289,82)->fontFamily('itc bookman');
