@@ -33,6 +33,7 @@ $p->add('sprite',
 	sub { 
 	  $p->Text('text','Text Sprite',-font,$p->f3);
 	  $p->Image('image','Xcamel.gif');
+	  $p->Image('i2','eq1.gif');
 	  $p->Anim('anim','anim.gif');
 	  for (1..10) {compuman("gus$_");}
 	  $p->load ;

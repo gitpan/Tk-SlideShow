@@ -38,6 +38,27 @@ itself.
 You will find examples of scripts using this modules in directories
 ex1, ex2, ...
 
+=head1 CHANGE
+
+=head2 since 0.01
+
+=over 2
+
+=item Choosers
+
+added a font chooser, a color chooser.  
+
+=item Multipos-sition I<Sprite> 
+
+added a way of defining a path for a B<Sprite> to follow on a slide.
+
+=item Documentation
+
+added a way for producing documentation out of slides. (method
+C<latex>)
+
+=back
+
 =head1 AUTHOR
 
 Olivier Bouteille (bouteille@dial.oleane.com)

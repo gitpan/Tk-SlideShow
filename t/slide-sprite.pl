@@ -11,3 +11,4 @@ Tk::SlideShow::Sprite->Get('text')->place(290,148);
 Tk::SlideShow::Sprite->Get('gus7')->place(764,844);
 Tk::SlideShow::Sprite->Get('gus8')->place(823,840);
 Tk::SlideShow::Sprite->Get('gus9')->place(887,837);
+Tk::SlideShow::Sprite->Get('i2')->place(466,617);

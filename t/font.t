@@ -10,6 +10,9 @@ chdir('t');
 my $p = Tk::SlideShow->init(1024,768);
 $p->save;
 my ($mw,$c,$h,$w) = ($p->mw, $p->can, $p->h, $p->w);
+my $warning = "Warning : It may take some time 
+	and block your X11 server
+	for a while";
 
 my %f;
 open(FONT,"xlsfonts |") or die;
@@ -24,6 +27,9 @@ my @family = sort keys %f;
 
 $p->add('size', 
 	sub { 
+	  $p->Text('warning',$warning,-font, $p->f2,-fill,'red');
+	  $p->Text('advert',"This takes the whole screen size\nin case of a 1024x768 definition",
+		   -font, $p->f1_5,-fill,'green');
 	  for (qw(f0_5 f1 f1_5 f2 f3 f4 f5 ff0_5 ff1 ff2 ff3)) {
 	    $p->Text($_,"text $_",-font, eval "\$p->$_");
 	  }
@@ -38,12 +44,9 @@ while (@family) {
     my $thistest = $counter+1;
     $p->add("family$counter", 
 	    sub { 
-	  my $warning = "Warning : It may takes some time 
-	and block you X11 server
-	for a while";
 	  print "$warning\n";
 	  my $scounter = 0;
-	  $p->family('utopia');
+	  $p->family('times');
 	  $p->Text('fontpos/warning',$warning,-font, $p->f2,-fill,'red');
 	  for (@ft) {
 	    print "Create text for font $_\n";

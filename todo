@@ -1,17 +1,21 @@
-* functionnalities
+* Functionnalities
 
-- add a travel comcept of sprite : that is sprite that evolve thru a
-  slide rather than jus come from left top bottom or right.
-
-- Add a way of producing postscript of slides
+- Add a way of producing postscript of slides.
 
 - add a notion of library of sprite (autoload-able, and browsable) 
+  Like compuman
+
+- change the ticker tape to make it possible to tape any tagged widgets
 
 - add a gif sprite chooser with a library.
 
-- Add a font chooser.
+- Evolvable Sprite : Make it possible not to specify the number of
+  position it takes. And also make it posible to have several Sprite
+  moving in the same times.
 
-- Add a color chooser.
+- add a font chooser.
+
+- add a color chooser.
 
 * Documentation
 

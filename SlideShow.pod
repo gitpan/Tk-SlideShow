@@ -1,6 +1,6 @@
 =head1 NAME
 
-Tk::SlideShow -- a B<Tk> B<Perl> module for building presentation.
+Tk::SlideShow -- a B<Tk> B<Perl> module for building slide-like presentations.
 
 =head1 DESCRIPTION 
 
@@ -10,7 +10,7 @@ This module provide B<Perl> with the ability to :
 
 =item *
 
-build interactive and visual presentation with B<Perl> and B<Tk>,
+build interactive and visual presentations with B<Perl> and B<Tk>,
 
 =item *
 
@@ -18,15 +18,17 @@ build simple slide simply,
 
 =item *
 
-build sophisticated slides (and even more than PowerPoint one) up to real GUI,
+build sophisticated slides (and even more than PowerPoint one) up to
+real GUI,
 
 =item *
 
-build structured presentation, precisely computed,
+build structured presentations, precisely computed,
 
 =item *
 
-take advantage of your knowledge of B<Perl> and B<Tk>,
+take advantage of your knowledge of B<Perl> and B<Tk> for building
+presentations,
 
 =item *
 
@@ -34,12 +36,12 @@ build portable presentations on all Unix provided with B<Tk>/B<Perl>
 
 =item *
 
-build presentation that will let the attendees wonder how they will do
+build presentations that will let the attendees wonder how they will do
 it with Microsoft PP C<:-)>.
 
 =item *
 
-build presentation without leaving your prefered  developping enviroment : Unix,
+build presentations without leaving your prefered developping enviroment : Unix,
 
 =back
 
@@ -48,7 +50,7 @@ slides will be defined and descripted :
 
 =over 4
 
-=item in B<Perl>,
+=item in a B<Perl> script,
 
 for everything that is easier to define in B<Perl>,
 
@@ -59,39 +61,40 @@ automaticaly on slide's specific files -- in B<Perl> of course.
 
 =back
 
-In this document, I have tried to entralace tutorial and full
-description approach. This makes it a little bit surprising. But I
+In this document, I have tried to interlace a tutorial and a full
+description approach. This may sound it a little bit amazing, but I
 think it was possible in this case.
 
 =head1 FIRST CONTACT
 
-To build a presentation with B<Tk::SlideShow>, you had better to create a
-directory for keeping all the files that will be created.
+First of all, to build a presentation with B<Tk::SlideShow>, you had
+better create a presentation specific directory for keeping all the
+files that will be created.
 
 In this directory, you have to edit the main script : This script will
 have to C<use Tk::SlideShow;> and some of its methods.
 
 The C<init> method lets B<Tk::SlideShow> self initialize for a new
-presentation.  It understand 2 parameters as the sizes (resp. width
-and height) of the main windows. Without these parameters the sizes of
+presentation.  It understands 2 parameters as the sizes (resp. width
+and height) of the main window. Without these parameters, the sizes of
 the window will be the mawimum sizes of the X11 root. But sometimes,
 like me, you have a bigger definition on your Unix desktop than on
 your laptop. And perhaps, you will preferably travel the world with
 your laptop rather than with your desktop, to show your
-presentations. So you will develop it for, e.g. a definition of
-C<1024x768> instead of C<1600x1280> desktop 21 inch screen. So, you
-will begin your script with :
+presentations. So, for example, you will design your presentation
+for a definition of C<1024x768> instead of C<1600x1280> desktop 21
+inch screen. Your script will therefor begin with something like :
 
 	my $p = Tk::SlideShow->init(1024,768);
 
 As Larry says often, it's useless to C<or die>. Method C<init> return
-an instance of B<Tk::SlideShow>. You may feel it useless to use an
-instance of B<Tk::SlideShow> that will be probably uniq during the
+an instance of class B<Tk::SlideShow>. You may feel it useless to use
+an instance of B<Tk::SlideShow> that will be probably uniq during the
 life of the script execution, but this help for internal locality of
 variables and also reduce the number of character to type. Now to
 invoke a B<Tk::SlideShow> method, you will just have to type
 C<$p-E<gt>method> rather than C<Tk::SlideShow-E<gt>method> (remember,
-laziness ...)
+laziness ...).
 
 Methods C<mw>, C<can>, C<h> and C<w> help you to access internals
 objets and variables respectively : C<MainWindow>, C<Canvas>, width
@@ -101,7 +104,8 @@ insert this small line in the beginning of your script :
         my ($mw,$c,$h,$w) = ($p->mw, $p->can, $p->h, $p->w);
 
 For pratical reason, I will suppose in future examples that these
-lines are at the beginning of your script without mentioning it.
+lines are at the beginning of my examples scripts without mentioning
+it.
 
 Now, I am sure you're dying to know how to create a simple slide. This
 is simple, as promised above. Let's look at it first and explain it afterward :
@@ -116,19 +120,21 @@ is simple, as promised above. Let's look at it first and explain it afterward :
 Just try (run) it (remember : As I said before, you have to add lines at the
 beginning of your script) ! 
 
-While running, note that you are able to drag the text "Hello World !"
-with the button 1, where you want it to be.  Pressing key C<s>, you
-will save its positions. Pressing key C<q> will quit the presentation. If
-you play it again, you will find your text at the same place were you
-let it just after you press key C<s>. Pressing key C<space> or C<backspace>
+While running the script with B<Perl>, it will create a big window
+containing a Tk Canvas : in the middle : a text. Note that you are
+able to drag the text "Hello World !" with the button 1, where you
+want it to be.  Pressing key C<s>, you will save its
+positions. Pressing key C<q> will quit the presentation. If you play
+it again, you will find your text at the same place were you let it
+just after you press key C<s>. Pressing key C<space> or C<backspace>
 let's you navigate thru different slides. Here, you just have one
 .. so ...
 
 This is how it looks. Now let's explain what it means :
 
-First I call the C<save> method. As decribe more precisely later, this make
-all your slides sensible to a keypress on C<s> for  saving the artistic 
-caracteristics of your slides on a file.
+First, I call the C<save> method. As described more precisely later,
+this make all your slides sensible to a keypress on C<s> for saving
+the artistic caracteristics of your slides on a file.
 
 Then I call method C<add>. This is for pushing a new slide on the pile
 of slides. I give to arguments : a name to the slide to reference it
@@ -146,9 +152,9 @@ B<Tk::SlideShow> to play all the slides in sequence.
 
 That's all !
 
-It's sounds simple, doesn't it ?
+It sounds simple, doesn't it ?
 
-I am sure you have a tone of questions, for how to do this or
+I'm sure you have tones of questions, for how to do this or
 that. But that's not the point of this simple example to answer your
 questions. It's just a first contact with B<Tk::SlideShow>.
 
@@ -165,15 +171,14 @@ C<add> method. This is where you are going to specify your slides.
 As I mention above, this method add a new slide on the pile of already
 existing slides. 
 
-You have to give it a uniq name as a first parameter.  It's let you
-reference it more easely in the future (as you will see
-later). This name can be whatever a filename can be. Keep in mind,
-that the position of most of your objects will be saved in file call
-C<slide-name.pl>, where C<name> will be replace by the first argument
-to method C<add>.
+You have to give it a uniq name (or id) as a first parameter.  It lets
+you reference it in the future more easely (as you will see
+later). This name can be whatever a filename (without its directory)
+can be. Keep in mind, that the position of most of your objects will
+be saved in file call C<slide-name.pl>, where C<name> will be replace
+by the first argument to method C<add>.
 
-Then you have to give it a sub reference. This sub will receive the
-slide as an argument, but you will probably never use it.
+Then you have to give it a sub reference (as a second argument).
 
 
 =head2 Method C<current>
@@ -590,6 +595,33 @@ C<a_top> for making them arrive repectively from right or from top
 side of the slide. Note that you can play back this evolution by
 pressing C<Control-Button-3>.
 
+You are also able to let appear a  B<Sprite> suddenly by using 
+method C<a_warp>.
+
+Sometimes, it is useful to show a B<Sprite> evolving thru a path.
+This is done by using method C<a_multipos>. You have to give it a
+number of position, the B<Sprite> have to take. It will move from one
+position to another by clicking on button 3. As usual you don't have
+to specify in the script the coordinates of the positions. Just the
+number of position. When you play the slide first, B<Sprite> will
+stand in a default position. Just drag it where you wan't it to be
+with button 1. Do this for each position. Then save it. It will
+remenber where you have I<mouse-ly> specified each position.
+The script example  is trivial :
+
+	$p->add('workflow', sub {
+	   titre('WorkFlow');
+	   $p->Image('adoc','document.gif');
+	   # ....
+	   $p->load;
+	   $p->a_multipos(10);
+	} 
+
+That will help describing the different stage of a document in
+workflow system, for example. Here, the document will have 10
+differents position, it will remember.
+
+
 =head1 Linking B<Sprites>
 
 It's often useful to link B<Sprite> together, with a line, or an arrow or
@@ -618,8 +650,9 @@ Note that you can change IC of arrows shape using keyboard C<Up>,
 C<Down>, C<Left>, C<Right> when mouse is over the arrow, and their
 Control counter part if the mouse is on the arrow.
 
-You can also change the attach (cardinal) point of the link on each
-B<Sprite> it links together, by clicking button 1 or 3 on the link.
+You can also change the attach (cardinal) point of the arrow (which
+inherit from link) on each B<Sprite> it links together, by clicking
+button 1 or 3 on the arrow.
 
 You can even add your new way of linking B<Sprites>. As an example, I
 provide in B<Tk::SlideShow> a method C<newOrg> that will helps you to create
@@ -788,21 +821,76 @@ You can easily make box entities hyperlinks to slides.
 
 =back
 
+=head1 DOCUMENTATION
+
+As far as I am concerned, I feel that considering a paper copy of
+slides as a documentation of a presentation is non sense. You have to
+add your speach added value to it. That why, I like to add to my
+presentation, a documentation to each slides. This helps also to
+prepare the presentation.
+
+To add documentation to my slides, I have choosen to use LaTeX as a
+language. Maybe in a future release, somebody else will want to
+express attach documentation to slide in a différent language. 
+
+So, that's the reason for the method C<latex> on a
+C<Tk::SlideShow::Diapo> object.
+
+To let you add an header and a footer of to your presentation paper, I
+have added 2 methods for the C<Tk::SlideShow> object : C<latexheader> and C<latexfooter>.
+
+To output the whole documentation on a file, you may use the method
+C<latex> on the C<Tk::SlideShow> object (note that this is not on the
+C<Tk::SlideShow::Diapo> object this time).
+
+So to sumarize this here's the look of a more complete example of a
+C<Tk::SlideShow> script :
+
+	use Tk::SlideShow;
+
+	my $p = Tk::SlideShow->init(1024,768);
+	$p->save;
+        my ($mw,$c,$h,$w) = ($p->mw, $p->can, $p->h, $p->w);
+	my $d; # stands for a diapo.
+	$d = $p->add('menu',         sub { ...; $p->load });
+	$d->latex('blah blah on the menu slide');
+	$d = $p->add('introduction', sub { ...; $p->load });
+	$d->latex('blah blah on the introduction slide');
+	...
+	$d = $p->add('development',  sub { ...; $p->load });
+	$d->latex('blah blah on the development slide');
+	$d = $p->add('conclusion',   sub { ...; $p->load });
+	$d->latex('blah blah on the conclusion slide');
+
+	if (grep (/-latex/,@ARGV)) {
+	  $p->latex("doc.tex");
+	  exit 0;
+	}
+
+	$p->current(shift || 0);
+	$p->play;
+
+
 =head1 SYNOPSIS
 
-here is a summurized synopsis of B<Tk::SlideShow> methods.
+Here is a summurized synopsis of B<Tk::SlideShow> methods.  Remember
+that it is an alpha stage release. I hope the API will not change, but
+it is not garanteed (by me) up to now. So if you already use this
+interface for building presentation, you'd better keep the file
+C<SlideShow.pm> used, not to far.
 
 =head2 Base Level
 
   use Tk::SlideShow;
-  my $p = Tk::SlideShow->new;	# initialize canvas according to the curretn screen
-  $p->bg(?sub|color?);  # change background 
-  $p->add(?'nom',sub);  # add a slide
-  $p->clean;	        # clean the current slide
+  my $p = Tk::SlideShow->new;	# initialize canvas according 
+				# to the current screen
+  $p->bg(?sub|color?);          # change background 
+  my $d = $p->add(?'nom',sub);  # add a slide
+  $d->latex('..');		# add latex documentation
   my ($mw,$c,$h,$w) = ($p->mw,$p->can,$p->h,$p->w);
-		        # retrieve key context variables 
-  $p->current(?slideid);# retrieve/set current slide
-  $p->currentName;	# retrieve current Name of the slide
+				# retrieve context variables 
+  $p->current(?slideid);	# retrieve/set current slide
+  $p->currentName;		# retrieve current Name of the slide
   $p->warp($spriteid,$tkevent,$slideid);
 			# jump on slideid in case of tkevent on spriteid
   $p->save;		# make the presentation save-able by pressing 's'
@@ -810,47 +898,43 @@ here is a summurized synopsis of B<Tk::SlideShow> methods.
 			# default slide file
   $p->play;		# play the slides
 
-  $p->a_top(slideid,...);
-  $p->a_left(slideid,...);
-  $p->a_bottom(slideid,...);
-  $p->a_right(slideid,...);  
+  $p->a_top(sprideid,...);
+  $p->a_left(spriteid,...);
+  $p->a_bottom(spriteid,...);
+  $p->a_right(spriteid,...);  
 			# make designated sprites arrive on the slide
 			# from top left bottom or right
 			# sequencialy in this order 
 			# on button3 click.       
+  $p->a_multipos(spriteid,nbposition);
+			# make the spriteid evolve on a button 3 click thru 
+			# up to nbposition
 
-
-=head2 Higher level
-
-  $p->title_ne("Olivier Bouteille");
-			# set a title to the slide (nord-est)
-  $p->title_se("ATPS (At The Perl Service) !");
-			# idem but for south-est
+  $p->latex('toto.tex')	# produces on complete latex documentation
+  $p->latexheader(?header?);
+  $p->latexfooter(?footer?);
+			# get/set documentation header/footer
 
 =head2 C<Sprites>
 
   $p->newSprite($id);	 # create an empty sprite
   $p->Text($id,$texte,@texte_options);
-			 # Predefined Text sprite
+			 # return a predefined Text sprite
   $p->Window($id,$widget,$canvas_widget_options);
 			 # Predefined tk window Sprite
-  $p->Image($filename);  # redefined Image Sprite
-  $p->framed($id,$text); # Predefined frame text Srite
+  $p->Image($filename);  # Predefined Image Sprite
+  $p->Anim($filename);   # Predefined Animation GIF Sprite
 
 =head1 AUTHOR
 
-Olivier Bouteille
+Olivier Bouteille (bouteille@dial.oleane.com)
+
+Will you be kind enough to excuse my poor english, and send me
+corrections.
 
 =head1 SEE ALSO
 
 B<Perl>(1). et B<Tk/perl>
 
 =cut
-
-# Local Variables: ***
-# mode: perl 
-# LocalWords:  play shift add sub End load Tk::SlideShow new my save die can current mw
-# LocalWords:  prompt-unix coderef sprite perl Tkperl createText chocolate bg
-# LocalWords:  cliquera warp NAME
-# End: ***
 

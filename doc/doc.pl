@@ -19,7 +19,7 @@ sub items {
 	    $id++;
   }
 }
-$d = $P->add('sommaire',sub {
+$d = $P->add('summary',sub {
 	  title('Tk::SlideShow');
 	  my $c = 'a0';
 	  items('a0',"What ?\nWhy ?\nHow ?",

@@ -1,4 +1,6 @@
 Tk::SlideShow::Sprite->Get('ff0_5')->place(747,328);
+Tk::SlideShow::Sprite->Get('advert')->place(586,431);
+Tk::SlideShow::Sprite->Get('warning')->place(577,596);
 Tk::SlideShow::Sprite->Get('f1')->place(116,525);
 Tk::SlideShow::Sprite->Get('f2')->place(145,424);
 Tk::SlideShow::Sprite->Get('f3')->place(173,345);
