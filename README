@@ -40,6 +40,24 @@ ex1, ex2, ...
 
 =head1 CHANGE
 
+=head2 since 0.02
+
+=over 2
+
+=item html
+
+Add a way to attach html doc to a slide so that you can produce an
+html version of your presentation. Up to now, it use xwd to snapshot
+the presentation. It use imagemagick convert to produce png image
+format file of snapshots. Depends on you browers, but you may have pb
+to visualize png snapshots. 
+
+=item ticker tape
+
+Add a ticker tape Sprite. It is done to attract attention of attendees.
+
+=back
+
 =head2 since 0.01
 
 =over 2

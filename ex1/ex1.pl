@@ -5,7 +5,7 @@ use strict;
 
 my $p =  Tk::SlideShow->init(1024,768);
 
-my ($mw,$c,$h,$w) = ($p->mw, $p->can, $p->h, $p->w);
+my ($mw,$c,$h,$w) = ($p->mw, $p->canvas, $p->h, $p->w);
 
 $p->save;
 

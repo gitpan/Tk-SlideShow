@@ -9,7 +9,7 @@ my $p=init Tk::SlideShow(1024,768) or die;
 
 $p->save;
 
-my ($mw,$c,$h,$w) = ($p->mw, $p->can, $p->h, $p->w);
+my ($mw,$c,$h,$w) = ($p->mw, $p->canvas, $p->h, $p->w);
 
 sub car {
   my $id = shift;

@@ -9,7 +9,7 @@ use strict;
 chdir('t');
 my $p = Tk::SlideShow->init(1024,768);
 $p->save;
-my ($mw,$c,$h,$w) = ($p->mw, $p->can, $p->h, $p->w);
+my ($mw,$c,$h,$w) = ($p->mw, $p->canvas, $p->h, $p->w);
 my $warning = "Warning : It may take some time 
 	and block your X11 server
 	for a while";

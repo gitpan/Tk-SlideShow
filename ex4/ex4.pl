@@ -2,7 +2,9 @@
 # Date de création : Mon May 24 15:35:58 1999
 # par : Olivier Bouteille (oli@localhost.oleane.com)
 
-use SlideShow;
+use lib qw(../blib/lib);
+
+use Tk::SlideShow;
 use strict;
 
 my $p = Tk::SlideShow->init(600,600);
