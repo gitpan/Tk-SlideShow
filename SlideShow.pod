@@ -210,11 +210,11 @@ As mention above, these methods deal with persistance of your added
 artistic value. So, I am sure you realize how important they are
 C<:-)> !
 
-The method C<save> may be called, but only once. It just indicates to
-B<Tk::SlideShow> that you do want B<Tk::SlideShow> to save the
-modifications you have done during the presentation until pressing key
-C<s>. If this is not what you want, just comment the C<$p-E<gt>save;>
-line.
+The method C<save> may be called, but only once (is needed). It just
+indicates to B<Tk::SlideShow> that you do want B<Tk::SlideShow> to
+save the modifications you have done during the presentation until
+pressing key C<s>. If this is not what you want, just comment the
+C<$p-E<gt>save;> line.
 
 The method C<load> must be called when you want B<Tk::SlideShow> to
 load what have been saved by method C<save> : mainly, the position of
@@ -236,14 +236,14 @@ It may sound obscure that you may have to specify an argument, but we
 will see later that it is very usefull in some cases. 
 
 But remember : you call method C<save> once, and method C<load> many
-times, often at least once per slides.
+times, often at least once per slide.
 
 =head2 Method C<bg>
 
 This method is used to specify a sub reference that will be called
 before playing a slide. It stands for I<background>.
 
-This sub will receive the B<Tk::SlideShow> object as argument.
+(This sub will receive the B<Tk::SlideShow> object as argument.)
 
 Here is an example :
 
@@ -394,7 +394,7 @@ For the same reasons, it would have been more structured to :
 
 Nothing in this example specify any position. This will be done
 later, during the execution. But I am sure you have already understand
-it, since I already mention it before several times.
+it, since I already mention it  several times.
 
 =back
 
@@ -411,7 +411,7 @@ Simple, isn't it ?
 
 There exists some more B<Sprite> in B<Tk::SlideShow>, but their definition is so
 simple that I think it will be more suitable to look at the code in
-the file C<Tk/SlideShow.pm> and think of it as custumable examples.
+the file C<Tk/SlideShow/Sprite.pm> and think of it as custumable examples.
 
 
 =head2 adding your own B<Sprite>
@@ -518,10 +518,12 @@ text, then just call C<framed> like this.
 =head2 Example 3
 
 Let's have an other example, a more classic example.  Imagine you want
-to show source example in your show.  You will probably want to have a
-B<Sprite> specialized representing these scripts examples. To be
-consistant, you want it to look very similar in the whole presentation
-slides. Even perhaps in all the presentations.
+to explain a source example (perl, of course) in your presentation.
+You will probably want to have a B<Sprite> specialized representing
+these scripts examples. To be consistant, you want it to look very
+similar in the whole presentation slides. Even perhaps in all the
+presentations you will build in your job, or even ... your life
+(horror !)
 
 Here's what you can do :
 
@@ -544,7 +546,7 @@ Here's what you can do :
 
 Here, I've created an new B<Sprite>, which consists of a 2 text
 items. One with a fixe text : C<Script Example> and one with the the
-tex of the example which is passed as an argument to the function.
+text of the example which is passed as an argument to the function.
 
 Note that font used for these texts (C<f1> and C<ff1>) will be
 explained later.
@@ -580,11 +582,11 @@ Simple and powerful, isn't it : This is just B<Perl> and B<Tk> !
 
 =head1 Managing progression in the slide discovery
 
-Often, you would like to explain progressively a complex slide. So,
-you would like to let B<Sprites> appear in a particular order, so that
-attendees will discover a complex slide progresively.
+Often, you'd like to explain progressively a complex slide. So,
+you'd like to let B<Sprites> appear in a particular order, so that
+attendees will discover the complex slide progresively.
 
-B<Tk::SlideShow> provide you with the ability to let the B<Sprites> appear
+B<Tk::SlideShow> provides you with the ability to let the B<Sprites> appear
 progresively as you press button 3 of your mouse. They will appear,
 slipping from top, bottom, left or right edge of the slide.
 
@@ -609,19 +611,31 @@ C<a_top> for making them arrive repectively from right or from top
 side of the slide. Note that you can play back this evolution by
 pressing C<Control-Button-3>.
 
+If you need to let several B<Sprites> enter the slide together, then
+just give an C<refARRAY> of tags of these B<Sprites> instead of just
+one tag. As an example you may try, just add [] around map instruction
+in the previous example :
+
+	   $p->a_left([map{"item$_"}(0..2)]);
+
+You will see that the 3 items will arrive on the slide simultaneously !
+
 You are also able to let appear a  B<Sprite> suddenly by using 
 method C<a_warp>.
+
+Sometimes you may want to make a B<Sprite> leave the slide. Just
+replace the prefix C<a_> (standing for arrive) by C<l_>.
 
 Sometimes, it is useful to show a B<Sprite> evolving thru a path.
 This is done by using method C<a_multipos>. You have to give it a
 number of position, the B<Sprite> have to take. It will move from one
 position to another by clicking on button 3. As usual you don't have
 to specify in the script the coordinates of the positions. Just the
-number of position. When you play the slide first, B<Sprite> will
-stand in a default position. Just drag it where you wan't it to be
-with button 1. Do this for each position. Then save it. It will
-remenber where you have I<mouse-ly> specified each position.
-The script example  is trivial :
+number of position. When you play the slide for the first time, the
+B<Sprite> will stand in a default position. Just drag it where you
+wan't it to be with button 1. Do this for each position. Then save it
+(press C<s> key). It will remenber where you have I<mouse-ly>
+specified each position.  The script example is trivial :
 
 	$p->add('workflow', sub {
 	   titre('WorkFlow');
@@ -930,6 +944,11 @@ C<SlideShow.pm> used, not to far.
 			# from top left bottom or right
 			# sequencialy in this order 
 			# on button3 click.       
+  $p->l_top(sprideid,...);
+  $p->l_left(spriteid,...);
+  $p->l_bottom(spriteid,...);
+  $p->l_right(spriteid,...);  
+			# make them leave the slide instead of arrive 
   $p->a_multipos(spriteid,nbposition);
 			# make the spriteid evolve on a button 3 click thru 
 			# up to nbposition

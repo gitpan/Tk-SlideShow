@@ -25,7 +25,8 @@ $p->add('pleft',
 	  $p->a_left([map {"shift/i$_"}(1..10)]);
 	  $p->l_left([map {"shift/i$_"}(1..10)]);
 	  $p->a_left([map {"shift/i$_"}(1..10)]);
-	  for (1..3) {$p->shiftaction;}
+	  for (1..3) {print "  shift $_\n";$p->shiftaction;}
+	  for (1..3) {print "unshift $_\n";$p->unshiftaction;}
 	  print "ok $nbok\n"; $nbok++;
 
 	});

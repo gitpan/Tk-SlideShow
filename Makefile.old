@@ -144,7 +144,6 @@ PERL_ARCHIVE =
 TO_INST_PM = SlideShow.pm \
 	SlideShow.pod \
 	SlideShow/Arrow.pm \
-	SlideShow/Arrow.pm.~1~ \
 	SlideShow/DblArrow.pm \
 	SlideShow/Diapo.pm \
 	SlideShow/Dict.pm \
@@ -155,8 +154,6 @@ TO_INST_PM = SlideShow.pm \
 
 PM_TO_BLIB = SlideShow/Dict.pm \
 	$(INST_LIBDIR)/SlideShow/Dict.pm \
-	SlideShow/Arrow.pm.~1~ \
-	$(INST_LIBDIR)/SlideShow/Arrow.pm.~1~ \
 	SlideShow/Sprite.pm \
 	$(INST_LIBDIR)/SlideShow/Sprite.pm \
 	SlideShow.pod \
@@ -430,7 +427,7 @@ clean ::
 # Delete temporary files (via clean) and also delete installed files
 realclean purge ::  clean
 	rm -rf $(INST_AUTODIR) $(INST_ARCHAUTODIR)
-	rm -f $(INST_LIBDIR)/SlideShow/Dict.pm $(INST_LIBDIR)/SlideShow/Arrow.pm.~1~ $(INST_LIBDIR)/SlideShow/Sprite.pm $(INST_LIBDIR)/SlideShow.pod $(INST_LIBDIR)/SlideShow/Org.pm $(INST_LIBDIR)/SlideShow/Placeable.pm $(INST_LIBDIR)/SlideShow/Arrow.pm $(INST_LIBDIR)/SlideShow/DblArrow.pm $(INST_LIBDIR)/SlideShow/Diapo.pm $(INST_LIBDIR)/SlideShow/Link.pm $(INST_LIBDIR)/SlideShow.pm
+	rm -f $(INST_LIBDIR)/SlideShow/Dict.pm $(INST_LIBDIR)/SlideShow/Sprite.pm $(INST_LIBDIR)/SlideShow.pod $(INST_LIBDIR)/SlideShow/Org.pm $(INST_LIBDIR)/SlideShow/Placeable.pm $(INST_LIBDIR)/SlideShow/Arrow.pm $(INST_LIBDIR)/SlideShow/DblArrow.pm $(INST_LIBDIR)/SlideShow/Diapo.pm $(INST_LIBDIR)/SlideShow/Link.pm $(INST_LIBDIR)/SlideShow.pm
 	rm -rf Makefile Makefile.old
 
 

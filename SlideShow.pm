@@ -34,7 +34,7 @@ package Tk::SlideShow;
 
 use vars qw($VERSION);
 
-$VERSION='0.04';
+$VERSION='0.05';
 
 my ($can,$H,$W,$xprot,$present);
 my $mainwindow;
@@ -393,28 +393,43 @@ sub unshiftaction {
   my $c = $can;
   return unless $a;
   unshift @{$present->{'action'}},$a;
-  my ($tag,$maniere,$dest) = @$a;
+  @_ = (@$a);
+  my $tag = shift;
+  my $maniere = shift;
   my $step = 50;
-  $maniere eq 'a_top'  and
-    do {for(my $i=0;$i<$step;$i++){$c->move($tag,0,- $dest/$step); $c->update;}};
-  $maniere eq 'a_bottom'
-    and do {for(my $i=0;$i<$step;$i++){$c->move($tag,0,($H-$dest)/$step); $c->update;}};
-  $maniere eq 'a_left'
-    and do {for(my $i=0;$i<$step;$i++){$c->move($tag,- $dest/$step,0); $c->update;}};
-  $maniere eq 'a_right'
-    and do {for(my $i=0;$i<$step;$i++){$c->move($tag,($W-$dest)/$step,0); $c->update;}};
-  $maniere eq 'a_warp'
-    and do {$c->move($tag,0,-$dest);};
+  $maniere eq 'smooth'  and 
+    do {
+      my ($dx,$dy) = @_;
+      for(my $i=0;$i<$step;$i++){
+	if (ref($tag) eq 'ARRAY') {
+	  for (@$tag) {$c->move($_,-$dx/$step,-$dy/$step);}
+	} else { $c->move($tag,-$dx/$step,-$dy/$step);}
+	$c->update;
+      }
+    };
+  $maniere eq 'direct' and 
+    do {
+      my ($dx,$dy) = @_;
+      if (ref($tag) eq 'ARRAY') {
+	for (@$tag) {$c->move($_,-$dx,-$dy);}
+      } else { $c->move($tag,-$dx,-$dy);}
+      $c->update;
+    };
   $maniere eq 'a_chpos' and 
     do {
-      my ($tag,$m,$i,@options) = @$a;
-      return unless $i>0;
-      $i--;
-      #print "undoing $m on tag $tag i=$i\n";
-      my $sprite = Tk::SlideShow::Sprite->Get($tag);
-      $sprite->chpos($i,@options);
+      my ($i,@options) = @_;
+      #print "doing $m on tag $tag i=$i\n";
+      my $sprite;
+      if (ref($tag) eq 'ARRAY') {
+	for (@$tag) {
+	  $sprite = Tk::SlideShow::Sprite->Get($_);
+	  $sprite->chpos($i,@options);
+	}
+      } else {
+	$sprite = Tk::SlideShow::Sprite->Get($tag);
+	$sprite->chpos($i,@options);
+      }
     };
-
 }
 
 sub start_slide { $present->clean->trace_fond; }

@@ -33,7 +33,7 @@ reference to this module.
 There's also a not yet finished presentation of C<Tk::SlideShow> using
 itself.
 
-=Head1 EXAMPLE
+=head1 EXAMPLE
 
 You will find examples of scripts using this modules in directories
 ex1, ex2, ...
@@ -96,7 +96,7 @@ C<latex>)
 
 Olivier Bouteille (bouteille@dial.oleane.com)
 
-=head PREREQUISITE
+=head1 PREREQUISITE
 
 You need to have X11::Protocol and Tk800.012 modules already install,
 
@@ -104,7 +104,7 @@ You need to use X11 (and of course Unix).
 
 You need to already know Perl5.4 and Tk
 
-=head MISCELANEOUS
+=head1 MISCELANEOUS
 
 Alpha stage release. API may change.
 

@@ -27,6 +27,8 @@
 
 * Improvement
 
+Use CVS for managing sources 
+
 Make it work even if X11:Protocol is not available
 
   
